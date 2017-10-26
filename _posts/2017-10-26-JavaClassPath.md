@@ -1,3 +1,9 @@
+---
+layout:post
+title:JavaClassPath
+---
+
+
 # Java class path
 最近遇到了两个问题
 1. 设置 *Atom* 的 *auto complete* 的时候发现需要设置 *class path* ,但是完全没弄懂class path 是什么意思.
