@@ -4,6 +4,7 @@ title: classreview
 ---
 
 ## Advanced Subjects
+Chinese:你好
 1. Bioengineering
 > No examinations
 - Business process modeling
