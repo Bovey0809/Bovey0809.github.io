@@ -1,6 +1,6 @@
 ---
-layout:post
-title:JavaClassPath
+layout: post
+title: JavaClassPath
 ---
 
 
