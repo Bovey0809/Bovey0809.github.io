@@ -1,6 +1,6 @@
 ---
-layout:default
-title:classreview
+layout: post
+title: classreview
 ---
 ## Advanced Subjects
 1. Bioengineering
