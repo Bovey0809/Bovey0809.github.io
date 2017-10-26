@@ -1,3 +1,7 @@
+---
+layout:default
+title:classreview
+---
 ## Advanced Subjects
 1. Bioengineering
 > No examinations
