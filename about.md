@@ -4,12 +4,12 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+A vegetable chicken in deep learning.
 
-### More Information
+# More Information
 
-A place to include any other types of information that you'd like to include about yourself.
+This is a place for me to code my life.
 
-### Contact me
+# Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[my364007886@gmail.com](My Email)
