@@ -1,7 +1,7 @@
 #+OPTIONS: toc:nil num:nil
 #+BEGIN_HTML
 ---
-layout: default
+Layout: default
 title: "Using org-mode with Jekyll"
 permalink: /:title/
 tags: hacking

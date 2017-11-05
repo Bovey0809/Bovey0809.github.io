@@ -47,30 +47,9 @@ tags: hacking
 -   根据网上的教程
 -   直接插入图片尝试
     -   org 官网教程可以和图片一起生成images
-    -   [test latex file](file:///Users/Super/Documents/GitHub/Bovey0809.github.io/images/2017-11-03-LSTM-colah's-blog-review_5f8a0448a1f73965285a2ecfed44d459f91d15b8.png)
+    -   ![test latex file]({{site.baseurl}}/images/2017-11-03-LSTM-colah's-blog-review_5f8a0448a1f73965285a2ecfed44d459f91d15b8.png)
               失败, 识别成了超链接
-    -   尝试使用export md  输出
-        成功, 图片生成完美.
-
-<img src ="/images/2017-11-03-LSTM-colah's-blog-review<sub>5f8a0448a1f73965285a2ecfed44d459f91d15b8</sub>.png"
-alt="John and Ella on Skiddaw" align="left" width="300" height="250"
-title="John and Ella on Skiddaw" class="img"</img>
-
-# 使用markdown的格式写图片.
-
--   \\![test latex file]({{site.baseurl}}/images/2017-11-03-LSTM-colah's-blog-review<sub>5f8a0448a1f73965285a2ecfed44d459f91d15b8</sub>.png)
--   失败
-
-# 使用
-
-# org notes and org static files export together to a specific folder.
-
--   read the tutorial on the website
-    [org to html tutorial](http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html)
--   create a latex below
-    \[\theta^{nx}\]
--   成功, 现在org export static, 然后从文件夹把生成图的链接放在md中.
--   [image in images](file:///Users/Super/Documents/GitHub/Bovey0809.github.io/images/jekyll-logo.png)
+    -   尝试使用export 输出
 
 # Hello World!
 
@@ -133,18 +112,3 @@ use the file name [remember](name.md)
 # Test whether it is the reason of post layout.
 
 # two files together i can;t figure out where it comes from.
-
-# work flow
-
-1.  write the org notes.
-2.  export using project function.
-    1.  export notes to md.
-    2.  export static files to /images/folder.
-3.  modify the md file's links.(hopefully it can be done by export
-    function itself)
-
-# 工作流程
-
-1.  写org
-2.  生成md, 生成static
-3.  static 链接更改.
