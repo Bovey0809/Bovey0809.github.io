@@ -1,0 +1,62 @@
+* DONE problem1 的意思
+  CLOSED: [2017-11-06 Mon 14:33]
+  :LOGBOOK:
+  - State "DONE"       from "NEXT"       [2017-11-06 Mon 14:33]
+  :END:
+  - 原文
+    You might have noticed that the definition of the LSTM cell involves 4 matrix multiplications with the input, and 4 matrix multiplications with the output. Simplify the expression by using a single matrix multiply for each, and variables that are 4 times larger.
+  - 翻译
+    输入的数据使用了四个矩阵的乘法, 输出也使用了四个, 简化计算, 使用一个输入乘以一个大矩阵.
+  - 解决办法
+    1. 对于输入信息使用一个矩阵
+       \[ W_1 \in  R^{4 \times \textit{vocabulary size} \textit{num_nodes} }\]
+    2. 对于输出信息使用相同大小的矩阵
+       #+BEGIN_SRC python
+                weights = tf.Variable(tf.truncated_normal([4*num_nodes, num_nodes]))
+       #+END_SRC
+
+* TODO 为什么和论文里面的LSTM结构不一样?
+** 区别在什么地方
+   code comment explain the reason
+   - the lstm in the code is the most simple one.
+** 绘制代码中的结构图(计算图)
+
+* TODO 理解问题二
+  - 使用bigrams的技术来训练LSTM.
+    - 原因: 使用单个的字来训练的时候, 生成的字向量矩阵非常的稀疏. 使用bigram来解决稀疏性.
+  - 论文结构
+    1. 使用词嵌入方式写入inputs
+    2. 写一个bigram LSTM
+    3. 在lstm上使用dropout
+* TODO Change the inputs to word embedding.
+** TODO The sequence of the original is disorder.
+   - try to figure out the original input data like.
+     - train_inputs are place holders
+     - [ ] try to find the input feed dictionary.
+* tricks
+  #+BEGIN_SRC python
+      %time exec_graph(graph)
+  #+END_SRC
+  - use the "%time" stamp in the code the check the time used.
+* Reference from github
+  [[https://github.com/Bovey0809/udacity-deep_learning/blob/master/6_lstm.ipynb][Github for assignment 6]]
+** write the bigram
+   - what is bigram?
+   - original batchgenerator.
+     1. train_batches = BatchGrnerator(train_text, 64, 10)
+        1. train_text ==> (1*9990000) a list.
+     2. train.next --> next(self)
+        1. batches = [self._last_batch]
+           1. _next_batch(self)
+              1. return batch ==> (batch_size, vocabulary_size)
+        2. return batches ==> (10*64*27)
+     3. batches2strings
+        1. characters
+           1. return list of lenth 64, every element is a chracter from one-hot embedding.
+
+* TODO How to change the code to make it as bigram?
+** TODO Try to change the structure of the one-hot method for the input training data in the preprocessing.
+   1. orginal
+      change
+** TODO Try to change the code in the LSTM to make it recognize two together.
+** TODO

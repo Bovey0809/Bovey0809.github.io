@@ -1,0 +1,4 @@
+* Preprocessing the code.
+  1. Note that the code is writen in python2. Some syntax should be changed to python3.
+** TODO Jupyter notebook use Javascript Regax
+     1. write the regex to replace all the print function.

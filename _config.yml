@@ -14,7 +14,7 @@ avatar: https://avatars2.githubusercontent.com/u/10627971?s=400&u=3f0352d951edde
 #
 # Flags below are optional
 #
-
+encoding: utf-8
 # Includes an icon in the footer for each username you enter
 footer-links:
   dribbble:
