@@ -20,12 +20,14 @@ layout: post
     - 最关键的一个步骤.
     - 采集数据, 整理缺失值.
     - 导入数据
+    
 #### 解压文件
 - 使用 zipfile 解压文件.
     ```python
         with zipfile.Zipfile('address', 'r') as myzip:
             myzip.extractall()
     ```
+    
 #### 读取csv文件
 - 一般使用pandas读取.
     ``` python
