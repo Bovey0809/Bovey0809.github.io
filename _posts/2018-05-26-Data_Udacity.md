@@ -1,6 +1,6 @@
 ---
 title: udacity data analysis Term 2 Lesson 1
-style: post
+layout: post
 ---
 
 ##  David数据整理示例
