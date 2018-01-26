@@ -57,7 +57,9 @@ layout: post
 
 ### 3. 清洗数据
     - 清晰数据的概念就是尽可能的把数据变得符合上面的tiny数据的三条规范.
+    
 [tiny 数据并不一定有用](https://simplystatistics.org/2016/02/17/non-tidy-data/)
+
     - 步骤
         1. define
             把需要做的整理任务写出来.变成任务清淡.
