@@ -89,31 +89,6 @@ for phrase in assaplist:
 
 - 这样的ASSERT是一个编程检验, 如果出现错误, 会返回一个assertError.
 
-```flow
-st=>start: 数据整理
-e=>end: finish
-op1=>operation: 收集数据:
-下载,抓取,
-导入编程环境
-op2=>operation: 评估数据:
-质量和整洁度
-利用编程评估
-op3=>operation: 清洗数据:
-define
-code
-test
-cond=>condition: 数据符合三原则:
-变量成列
-个体成行
-角度成表
-
-st->op1
-op1(right)->op2
-op2(right)->op3
-op3(right)->cond
-cond(yes, bottom)->e
-cond(no, left)->op2
-```
 
 数据整理是一个循环的过程, 不可能一蹴而就.
 
