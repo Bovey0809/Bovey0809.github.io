@@ -1,0 +1,46 @@
+* Creating the state
+** state is an integer
+** discretize eahc factor
+** combine
+***
+* TODO 每一次循环, 需要重新“初始化”一个agent类吗?
+* DONE what is the meaning of *Minor violation* and *accident*?
+  CLOSED: [2017-11-14 Tue 10:35]
+  :LOGBOOK:
+  - State "DONE"       from "NEXT"       [2017-11-14 Tue 10:35]
+  :END:
+  在统计图表里面有四个标签, 每一个是什么含义
+  in the simulator.py file render_text() function.
+  1. minor violation
+     绿灯的时候不动了, 而且前方没有车.
+  2. major violation
+     闯红灯
+  3. minor accident
+     绿灯行驶过程中发生了车祸
+  4. major accident
+     闯红灯并且撞车.
+
+* DONE what is the state info for every action?
+  CLOSED: [2017-11-15 Wed 09:02]
+  :LOGBOOK:
+  - State "DONE"       from "NEXT"       [2017-11-15 Wed 09:02]
+  :END:
+  每一个state由自己定义, 从所有属性里面把需要的feature提取出来, 作为state
+* TODO how to calculate the reward for every action?
+* Different Epsilon Analyse
+  1. use the epsilon of \[\epsilon = a^t\]
+     \epsilon 的下降速度太快, 学习不充分.
+  2. \[\epsilon = \frac{1}{t^2}\]
+     下降得稍微慢一点, 但是还是没有达到最好
+     DC
+  3. \[\epsilon = e^{-at}\]
+     A+, F
+     由于随机a的存在, 这个加速下降了
+  4. \[\epsilon = cos(at)\]
+     同样也是加速下降, 但是稍微慢一点
+** 选择使用第三个epsilon
+   reward比较高
+* 改变 \alpha 的值
+  1. 0.6
+     get A plus but F of reliability, which means overfit.
+     -

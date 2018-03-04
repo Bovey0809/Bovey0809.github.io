@@ -1,0 +1,17 @@
+* conda env export > enviroment.yanl
+* Jupyter notebook
+  %pdb
+  - q
+* jupyter nbconvert --to html notebook.ipynb
+* jupyter nbconvert notebook.ipynb --to slides --post serve
+* sigmoid function
+
+
+* weights
+  - hidden inputs ==>
+  - X ==> m, n
+  - weights_h_out ==> h, o
+  - weights_in_h ==> n, h
+  - delta_ih ==> n, h
+  - delta_ho ==> h, o
+  -
