@@ -1,9 +1,6 @@
 ---
 title: "Publications"
-layout: "single"
-url: "/publications/"
 summary: "Research publications"
-ShowToc: false
 ---
 
 ## Research
