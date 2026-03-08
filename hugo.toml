@@ -1,0 +1,57 @@
+baseURL = 'https://bovey0809.github.io/'
+languageCode = 'en-us'
+title = 'Codemylife'
+theme = 'PaperMod'
+paginate = 10
+
+[params]
+  author = 'Bowei Hou'
+  description = 'Machine Learning Engineer @ Ultralytics'
+  env = 'production'
+  ShowReadingTime = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowToc = true
+
+  [params.homeInfoParams]
+    Title = "Bowei Hou"
+    Content = "Machine Learning Engineer @ [Ultralytics](https://ultralytics.com). Working on [YOLO](https://github.com/ultralytics/ultralytics) -- real-time object detection. Interests: machine learning, computer vision, model optimization."
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/Bovey0809"
+
+  [[params.socialIcons]]
+    name = "email"
+    url = "mailto:my364007886@gmail.com"
+
+[menu]
+  [[menu.main]]
+    identifier = "publications"
+    name = "Publications"
+    url = "/publications/"
+    weight = 10
+
+  [[menu.main]]
+    identifier = "blog"
+    name = "Blog"
+    url = "/posts/"
+    weight = 20
+
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 30
+
+[markup]
+  [markup.highlight]
+    style = 'monokai'
+    lineNos = false
+
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]

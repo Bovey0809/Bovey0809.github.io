@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>YOLO3D Stereo 3D Detection -- Experiments Report | Codemylife</title>
+<meta name="keywords" content="">
+<meta name="description" content="Detailed experiment log for stereo 3D object detection on KITTI using Ultralytics YOLO.">
+<meta name="author" content="Bowei Hou">
+<link rel="canonical" href="https://bovey0809.github.io/publications/yolo3d-experiments/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.da3211e5ef867bf2b75fd5a6515cfed7195c011e8ab735694e203810a827097b.css" integrity="sha256-2jIR5e&#43;Ge/K3X9WmUVz&#43;1xlcAR6KtzVpTiA4EKgnCXs=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://bovey0809.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://bovey0809.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://bovey0809.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://bovey0809.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://bovey0809.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://bovey0809.github.io/publications/yolo3d-experiments/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://bovey0809.github.io/publications/yolo3d-experiments/">
+  <meta property="og:site_name" content="Codemylife">
+  <meta property="og:title" content="YOLO3D Stereo 3D Detection -- Experiments Report">
+  <meta property="og:description" content="Detailed experiment log for stereo 3D object detection on KITTI using Ultralytics YOLO.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="publications">
+    <meta property="article:published_time" content="2026-03-08T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-03-08T00:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="YOLO3D Stereo 3D Detection -- Experiments Report">
+<meta name="twitter:description" content="Detailed experiment log for stereo 3D object detection on KITTI using Ultralytics YOLO.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Publications",
+      "item": "https://bovey0809.github.io/publications/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "YOLO3D Stereo 3D Detection -- Experiments Report",
+      "item": "https://bovey0809.github.io/publications/yolo3d-experiments/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "YOLO3D Stereo 3D Detection -- Experiments Report",
+  "name": "YOLO3D Stereo 3D Detection -- Experiments Report",
+  "description": "Detailed experiment log for stereo 3D object detection on KITTI using Ultralytics YOLO.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Stereo 3D Detection Experiments Report Table of Contents Project Overview Architecture Experiment Timeline Results Summary Detailed Experiment Notes Key Findings Error Analysis Failed Approaches Current Best Configuration 1. Project Overview This project implements stereo 3D object detection on KITTI by extending the Ultralytics YOLO framework. The model takes a 6-channel stereo image (left RGB + right RGB) and predicts 3D bounding boxes with class, dimensions, orientation, and depth.\nTask: Predict 3D bounding boxes (center, dimensions, orientation) from calibrated stereo image pairs.\nDataset: KITTI stereo — 3 classes (Car, Pedestrian, Cyclist), ~3,700 training / ~3,769 validation images.\nPrimary metric: AP3D@0.5 (3D Average Precision at 0.5 IoU threshold).\nHardware: 8x GPU training, batch size 128 (n/s) or 32 (m), image size 384x1248.\n2. Architecture 2.1 Backbone: Siamese/Weight-Shared (v36+, current best) The current recommended backbone uses a standard 3-channel YOLO26 backbone that processes left and right images separately via a batch dimension trick, with 100% shared weights.\nForward pass: 1. Split 6ch input → left [B,3,H,W], right [B,3,H,W] 2. Stack as batch: stereo = cat([left, right], dim=0) → [2B, 3, H, W] 3. Run backbone layers 0..tap_layer on [2B, 3, H, W] (shared weights) 4. Split at tap: left_feat = out[:B], right_feat = out[B:] 5. Pass (left_feat, right_feat) tuple to StereoCostVolume 6. Continue layers tap_layer+1..end with LEFT-ONLY features [B, C, H, W] 7. Head sees clean left-only P3/P4/P5 + cost_vol — identical interface Benefits:\n100% pretrained weight compatible — standard 3ch YOLO26 backbone, no groups=2 stem modification needed Clean left-only features — 2D detection sees only left image, matching mono YOLO evaluation Same cost volume quality — L/R features computed by identical (shared) weights at stride 4 Implementation: _predict_once override in Stereo3DDetModel (model.py). Model built with ch=3 when siamese: true in YAML.\nModel config: yolo26-stereo3ddet-siamese.yaml\n2.2 Stereo Cost Volume (v17+) The StereoCostVolume module computes sparse dot-product correlation between left and right features at 24 discrete disparity offsets (0 to 48 feature pixels at stride 4):\nclass StereoCostVolume(nn.Module): # Takes left/right features from backbone tap point (stride 4) # Computes normalized dot-product at each disparity offset # Refines: num_bins → c2 channels, downsamples stride 4 → stride 8 # Output: [B, 64, H/8, W/8] StereoCostVolume.forward accepts both (left, right) tuple (siamese) and single tensor (groups=2) for backward compatibility.\nKey design decision (v20+): The cost volume is routed only to depth branches (lr_distance, depth) in the head, NOT merged into P3. This avoids the 2D-3D task conflict where stereo correlation features dilute 2D detection quality.\nParameter overhead: ~75K params for s-size model (+0.7%).\n2.3 Detection Head: Stereo3DDetHeadYOLO11 Multi-scale head (P3/P4/P5) with auxiliary branches for 3D prediction:\nBranch Channels Target Encoding lr_distance 1 Stereo disparity Log-space: log(cx_left - cx_right) depth 16 Direct depth DFL bins: linspace(log(2m), log(80m), 16), decoded via softmax weighted sum dimensions 3 Object size (H,W,L) Normalized offset: (dim - mean) / std orientation 2 Heading angle [sin(alpha), cos(alpha)] Plus standard YOLO Detect outputs: boxes (xyxy), class scores, DFL features.\nThe cost volume (when present) is concatenated only with P3 features for depth branches (lr_distance, depth). The 2D detection branches (box, cls) and geometric branches (dimensions, orientation) see clean P3/P4/P5 features.\n2.4 Loss Function: Stereo3DDetLossYOLO11 6-component loss vector: [box, cls, lr_dist, depth, dims, orient]\n2D Detection: Standard YOLO box + cls losses via Task-Aligned Assigner (TAL) Auxiliary 3D: DFLoss for depth bins; smooth L1 for lr_distance, dimensions, orientation — all on TAL-assigned positive locations Loss weights (from YAML): lr_distance=2.0, depth=3.0, dims=1.0, orient=1.0 2.5 Depth Decoding (Inference) Dual depth sources fused via geometric mean:\nz_from_disparity = (fx * baseline) / (exp(lr_log) * input_w / letterbox_scale) z_from_direct = exp(depth_log) z_final = sqrt(z_disp * z_direct) # geometric mean 2.6 Post-Processing Pipeline NMS on 2D Detect outputs Aux map sampling at kept indices for 3D attributes 3D decoding: depth, dimensions, orientation → Box3D (Optional) Geometric construction: Gauss-Newton refinement with 7 constraint equations (Optional) Dense alignment: Photometric patch matching for sub-pixel depth refinement 2.7 Alternative: Group-Conv Stem (v35 and earlier) An older backbone variant using a groups=2 group-convolution stem for the first two layers. This processes left and right image features independently before merging.\nLayer 0: Conv(6→64, k=3, s=2, groups=2) # P1/2 — left/right independent Layer 1: Conv(64→128, k=3, s=2, groups=2) # P2/4 — left/right independent Layer 2: C3k2(128→256) # Features merge here Layer 3+: Standard YOLO backbone # P3/8, P4/16, P5/32 Note: The siamese backbone (Section 2.1) supersedes this approach with better pretrained weight compatibility and comparable or better accuracy.\n3. Experiment Timeline Phase 1: Baseline \u0026 Training Recipe (v3–v7) Version Changes Optimizer Epochs Aug Sizes v3 Cosine LR, patience=300 AdamW lr=0.005 300 No n,s,m,l,x v4 Higher LR (lr0=0.01) AdamW 300 No n,s,m v5 Short schedule + cosine (best of v2+v3) AdamW lr=0.005 100 No n,s,m,l,x v6 Long schedule (v5 start + v3 tail) AdamW lr=0.005 300 No n,s,m v7 2-stage: v5 weights → SGD finetune SGD lr=0.01 200 No n,s,m,l,x Phase 2: Loss \u0026 Module Experiments (v8–v11) Version Changes Result vs v5 v8 Laplacian uncertainty loss (2-ch depth branches) Neutral (n), catastrophic (s) v8b Laplacian with balanced weights, tighter clamp Slightly worse v9 StereoCorrelation + Laplacian + distance-aware loss n +2pp, s -7pp, m -6pp v10 Corr + smooth_l1 + sigma supervision n -6pp (all changes hurt) v11 Correlation module ONLY (original loss) Neutral (n -1pp, s -1pp) Phase 3: Augmentation \u0026 Depth Rebalancing (v12–v14) Version Changes Sizes v12 Enable augmentation (fliplr, HSV) + rebalance depth weights (lr_dist 0.2→2.0, depth 0.1→1.0) + 200ep n,s v13 SGD finetune from v12 checkpoints n,s v14 SGD from scratch (300ep, no AdamW warmup) n,s Phase 4: Architecture Comparison (v15–v16) Version Changes Sizes v15 YOLO26 vs YOLO11 backbone comparison (200ep AdamW) n,s v16 SGD finetune from v15 weights n,s Phase 5: Cost Volume (v17–v21) Version Changes Sizes v17 StereoCostVolume (merged into P3), 200ep AdamW n,s v18 SGD finetune from v17 weights n,s v19 m-size cost volume (batch=32, lr=0.001) m v20 Cost volume routed to depth branches ONLY (not merged into P3) n,s,m v21 SGD finetune ALL cost volume models (merged vs depth-only) n,s,m Phase 6: RAFT-Stereo \u0026 Distillation — All Failed (v22–v25) Version Changes Sizes v22 7-channel depth prior (RAFT-Stereo precomputed disparity as input) n,s v23 Disparity distillation from teacher (weight=1.0) n,s v24 Disparity distillation (weight=0.05) n,s v25 Feature distillation (MSE on P3 features from teacher) n,s Phase 7: Long Training \u0026 Bug Fixes (v26–v30) Version Changes Sizes v26 1000ep SGD from v21 (extended training) s v27 Multi-scale cost volume pyramid ablations s v28 Multi-scale + disparity loss (w=1.0) s v29 Multi-scale + disparity loss (w=0.05) / no disp s v30 v26 rerun with fitness function bugfix s Critical bug discovered in v30: The fitness function used to select best.pt was based on 2D mAP50-95, not AP3D@0.5. When get_stats() merged {**3d_metrics, **det_metrics}, the 2D fitness key overwrote the 3D one. This means all experiments prior to v30 saved best.pt based on 2D performance, not 3D. For v26, the true best AP3D@0.5 was 46.4% at epoch 550, but best.pt only had 25.5% (wrong epoch).\nFix: Pop fitness from det_metrics before merge, put 3D metrics last. Also fixed per-threshold GT matching and relaxed depth clamp.\nMulti-scale cost volume (v27-v29) — all failed:\nv28 (ms + disp w=1.0): s=39.5% — disparity loss dominated 87% of gradient v29 (ms + disp w=0.05): s=39.6% — same result even with balanced loss v29 (ms + no disp): s=38.9% — architecture itself hurts, not just the loss Single-scale baseline: s=46.4% (v26/v30) Conclusion: Fine-grained stride-4 single-scale \u003e coarser multi-scale pyramid. All multi-scale code removed. Phase 8: Depth Output Representation (v31–v33) Version Changes s-size Status v31 DFL-style depth bins (16 bins in log-space) 53.0% Done v32 Depth residual (16 bins + 1 regression offset) 48.8% Failed, reverted v33a Depth loss weight 3.0 (was 1.0) 56.5% Done v33b 32 depth bins (was 16) 56.2% Done Phase 9: YOLO26 Backbone, Evaluation \u0026 Siamese Architecture (v34–v36) Version Changes n s m l v34 YOLO26 backbone + costvol, all sizes, R40 eval 42.4% 49.8% 49.0% 47.5% v35 v34 + occlusion filter OFF (train on all objects) — 48.1% — — v36 Siamese weight-shared backbone (batch trick) 48.1% 48.3% 49.0% 50.9% All v34–v36 numbers are KITTI R40 Moderate mean AP3D@0.5.\nv34: Switched from YOLO11 to YOLO26 backbone with cost volume. Trained all sizes (n/s/m/l) with SGD 1000ep, same recipe as v30/v31. s-size is sweet spot; m/l overfit on small KITTI dataset. Introduced KITTI-standard R40 evaluation with difficulty splits (Easy/Moderate/Hard).\nv35: Disabled occlusion filter (filter_occluded=False) — trains on ALL objects including heavily occluded (DontCare). Result: Moderate -1.7pp but Hard +3.5pp @0.5. Car Hard@0.5: 55.7%→67.9% (+12.2pp). Better robustness to difficult cases.\nv36: Siamese/weight-shared backbone (see §2.7). Standard 3ch YOLO26 backbone processes L/R via batch trick [2B,3,H,W]. 100% pretrained weight compatible. R40 results match v35 across all sizes; l-size (50.9%) is new best. Car-only (nc=1) training failed — depth branch collapses with single-class TAL (see §5 notes).\n4. Results Summary 4.1 Complete Results Table All numbers are AP3D@0.5 (%) — best validation epoch.\nExperiment n-size s-size m-size Key Change Phase 1: Training Recipe v5 (baseline) 17.5 18.6 16.6 100ep AdamW, no aug v7 (SGD finetune) 26.7 — — v5 + 200ep SGD Phase 2: Loss \u0026 Modules v8 (Laplacian) 17.3 7.5 — Laplacian NLL → negative losses v9 (corr+Laplacian+dist) 19.6 12.0 10.7 Too many changes at once v10 (corr+fixed loss) 11.6 12.0 — Smooth L1 + sigma, still hurt v11 (corr only) 16.5 17.3 — StereoCorrelation is neutral Phase 3: Aug + Depth Rebalancing v12 (aug+depth weights) 18.4 19.0 — Augmentation + depth 0.1→1.0 v13 (v12 + SGD) 24.7 27.4 — SGD finetune from v12 v14 (SGD scratch) 22.3 26.2 — Pure SGD 300ep Phase 4: Architecture v15 (YOLO26 AdamW) 17.9 — — YOLO26 backbone v16 (YOLO11 SGD) — 27.1 — SGD from v15 YOLO11 Phase 5: Cost Volume v17 (costvol merged) 30.6 36.5 — StereoCostVolume in P3 v18 (costvol SGD) 31.7 35.6 — SGD finetune from v17 v19 (costvol m-size) — — 37.7 m-size, batch=32, lr=0.001 v20 (depth-only routing) 28.8 32.7 33.5 Cost vol → depth branches only v21 merged SGD 31.7 35.6 38.9 SGD from v17/v19 v21 depth-only SGD 34.0 40.2 37.7 SGD from v20 Phase 6: RAFT-Stereo (all failed) v22 (depth prior 7ch) 34.5 39.0 — RAFT-Stereo as 7th channel v25 (feature distill SGD) 31.1 33.0 — MSE distillation on P3 Phase 7: Long Training \u0026 Bug Fixes v26 (1000ep SGD) — 46.4† — Extended training (best.pt wrong due to bug) v28 (multi-scale + disp) — 39.5 — Multi-scale pyramid + disparity loss v29 (multi-scale no disp) — 38.9 — Multi-scale pyramid hurts even without disp loss v30 (v26 + fitness fix) — 46.4 — Correct best.pt selection by AP3D@0.5 Phase 8: Depth Output Representation v31 (DFL depth bins) 41.3 53.0 — 16 bins in log-depth, DFLoss v32 (depth residual) — 48.8 — 16 bins + 1 residual → regression hurt bins v33a (depth weight 3.0) — 56.5 — Depth loss 1.0 → 3.0 v33b (32 bins) — 56.2 — 16 → 32 DFL bins (≈same as 16) Phase 9: YOLO26 + Siamese v34 (YOLO26 costvol, R40) 42.4 49.8 49.0 YOLO26 backbone, R40 eval v35 (filter OFF, R40) — 48.1 — Occlusion filter disabled v36 (siamese, R40) 48.1 48.3 49.0 Weight-shared 3ch backbone v36-l (siamese, R40) — — — l-size: 50.9% (new best R40) †v26 best AP3D@0.5 was 46.4% at ep550, but best.pt saved wrong epoch due to fitness bug.\n4.2 Top 5 Results (R40 Moderate Mean) Rank Experiment AP3D@0.5 AP3D@0.7 Eval Best Epoch 1 l_yolo26_siamese_v36 50.9% 31.6% R40 — 2 s_yolo26_costvol_v34 49.8% 30.7% R40 — 3 m_yolo26_siamese_v36 49.0% 29.1% R40 — 4 s_yolo26_siamese_v36 48.3% 29.4% R40 — 5 s_yolo26_costvol_v35 (filter OFF) 48.1% 30.1% R40 210 Note: R40 and non-R40 metrics are not directly comparable. R40 uses KITTI-standard 40-point interpolation with difficulty splits; non-R40 uses COCO-style 101-point interpolation without difficulty filtering. R40 numbers are generally lower.\n4.3 Progression Chart (s-size AP3D@0.5) AP3D@0.5 (s-size, non-R40 unless noted) 57% ┤ ■ v33a depth_w=3 │ ■ v33b 32 bins 55% ┤ ■ v31 depth bins │ 50% ┤ ✗ v32 depth residual (reverted) │ ■ v34 R40* │ ■ v35 R40* 45% ┤ ■ v30 fitness fix │ 40% ┤ ■ v21 depth-only SGD │ ■ v22 depth prior │ ✗ v28 multi-scale 35% ┤ ■ v17 costvol merged │ ■ v18 SGD │ ■ v25 feat distill 30% ┤ │ ■ v13 SGD finetune 25% ┤ ■ v14 SGD scratch │ 20% ┤ ■ v5 baseline │ ■ v12 aug+depth 15% ┤ │ ■ v9 correlation 10% ┤ ■ v10 fixed loss │ ■ v8 Laplacian ┼────────────────────────────────────────────────────────────────────────────── v5 v8-11 v12-14 v17-21 v22-25 v26-30 v31-33 v34-v36 *R40 not comparable 5. Detailed Experiment Notes v5 — Baseline (100ep AdamW, No Augmentation) Goal: Establish baseline with short, efficient schedule.\nConfig: AdamW lr=0.005, cosine decay to lr*0.01, 100 epochs, no augmentation, groups=2 stem.\nResults: n=17.5%, s=18.6%, m=16.6%\nNotes: Fast convergence. Serves as control for all subsequent experiments. Model sizes beyond s don’t help much — suggests the bottleneck is not model capacity but depth estimation quality.\nv7 — SGD Finetune (200ep SGD from v5) Goal: Test 2-stage training (AdamW warmup → SGD refinement).\nConfig: Load v5 best weights → SGD lr=0.01, cosine, 200 epochs.\nResults: n=26.7% (+9.2pp over v5)\nKey insight: SGD finetuning is consistently the single most impactful training recipe change. The AdamW stage provides fast initial convergence; SGD refines with better generalization.\nv8 — Laplacian Uncertainty Loss Goal: Let the network learn per-sample uncertainty to down-weight hard/ambiguous depth predictions.\nChanges:\nDoubled channels for lr_distance (1→2) and depth (1→2) — extra channel predicts log_sigma Replaced smooth_l1 with Laplacian NLL: loss = |target - pred| * exp(-log_sigma) + log_sigma Results: n=17.3% (neutral), s=7.5% (catastrophic)\nFailure analysis: The Laplacian NLL loss went negative from epoch 4 onwards. The network learned to predict very large log_sigma values, effectively setting loss to 0 and stopping learning for depth branches. The log_sigma clamp range was too wide.\nv8b attempted tighter clamping [-2, 2] and reduced weights but still underperformed baseline.\nLesson: Laplacian NLL is unstable for this task. The smooth_l1 loss is more robust.\nv9 — StereoCorrelation + Uncertainty Fusion + Distance-Aware Loss Goal: Address depth bottleneck with explicit stereo correlation module.\nChanges (3 simultaneous):\nStereoCorrelation module: group-wise correlation at 24 disparity levels after stem Uncertainty-weighted depth fusion (precision-weighted average) in decode Laplacian NLL + distance-aware weighting (closer objects weighted higher) Results: n=19.6% (+2.1pp), s=12.0% (-6.6pp), m=10.7% (-5.9pp)\nFailure analysis: Combined too many changes. The Laplacian NLL was broken (same issue as v8). Nano model improved because the simpler architecture is more robust to loss instabilities, but larger models diverged.\nLesson: Never combine multiple experimental changes. Isolate each variable.\nv10 — Correlation + Fixed Loss Goal: Isolate correlation benefit with stable loss function.\nChanges: Same architecture as v9 but replaced Laplacian NLL with smooth_l1 + sigma supervision for decode-time uncertainty fusion.\nResults: n=11.6% (-5.9pp vs v5)\nFailure analysis: The sigma supervision and distance-aware weighting still interfered with training. Even with a stable base loss, the additional supervision signals created optimization conflicts.\nv11 — Correlation Only (Original Loss) Goal: Isolate the pure StereoCorrelation module effect with zero other changes.\nChanges: Only added StereoCorrelation after group-conv stem. Original smooth_l1 loss, geometric mean decode.\nResults: n=16.5% (-1.0pp), s=17.3% (-1.3pp)\nConclusion: The StereoCorrelation module (inserted into the main feature pathway) is neutral at best. It doesn’t help because the backbone already learns implicit stereo matching through the group-conv stem. This inline correlation approach was abandoned in favor of the cost volume approach (v17+).\nv12 — Augmentation + Depth Loss Rebalancing Goal: Apply three config-only improvements simultaneously.\nChanges:\nEnable stereo augmentation: fliplr=0.5, hsv_h=0.015, hsv_s=0.4, hsv_v=0.3 Rebalance depth loss weights: lr_distance: 0.2→2.0, depth: 0.1→1.0 Longer training: 100→200 epochs Results: n=18.4% (+0.9pp), s=19.0% (+0.4pp)\nNotes: Modest improvement alone, but these changes provide a better foundation for SGD finetuning (v13). The depth weight rebalancing was important — previously depth loss was 75x smaller than box loss (0.1 vs 7.5), meaning the network barely optimized for depth.\nv13 — SGD Finetune from v12 Goal: Apply proven SGD recipe to augmented + rebalanced weights.\nConfig: Load v12 best → SGD lr=0.01, cosine, 200 epochs, same augmentation.\nResults: n=24.7% (+6.3pp over v12), s=27.4% (+8.4pp over v12)\nKey insight: The s-size model finally overtakes n-size when combining augmentation + depth rebalancing + SGD finetune. This becomes the best non-cost-volume result.\nv14 — SGD from Scratch Goal: Test whether pure SGD matches 2-stage (AdamW → SGD) training.\nConfig: SGD lr=0.01, cosine, 300 epochs from scratch (matching total epoch budget of v12+v13).\nResults: n=22.3%, s=26.2%\nConclusion: Pure SGD is ~2pp worse than 2-stage training. The AdamW warmup provides a better starting point for SGD refinement. Two-stage training is the preferred recipe.\nv15 — YOLO26 vs YOLO11 Goal: Compare YOLO26 (newer) vs YOLO11 backbone architectures.\nChanges: YOLO26 uses shortcut=True in neck C3k2, enhanced SPPF, C2PSA. Same head class.\nResults: YOLO26 n=17.9% vs YOLO11 n=16.7% (200ep AdamW)\nConclusion: YOLO26 provides marginal improvement (~1pp) in the AdamW stage. Not enough to justify the architecture change.\nv16 — SGD Finetune from v15 Results: YOLO11 s=27.1% after SGD finetune\nConclusion: After SGD finetuning, YOLO11 and YOLO26 converge to similar performance. Architecture is not the bottleneck.\nv17 — StereoCostVolume (Merged into P3) Goal: Provide explicit stereo disparity information to the detection head via a learned cost volume.\nArchitecture: StereoCostVolume takes groups=2 features from backbone layer 1 (stride 4), computes dot-product correlation at 24 disparity offsets (0-48 feature pixels), refines to 64 channels, and downsamples to stride 8. Output is concatenated with P3 in the PAN neck.\nConfig: 200ep AdamW, same augmentation as v12+.\nResults: n=30.6% (+12.2pp over v12), s=36.5% (+17.5pp over v12)\nThis was the single biggest improvement in the entire experiment series. The cost volume provides the network with explicit stereo matching cues that the backbone cannot learn efficiently on its own. Unlike the v9-v11 StereoCorrelation (which was inserted inline and diluted backbone features), the cost volume is a separate pathway that enriches the head with pure disparity information.\nv18 — Cost Volume SGD Finetune Results: n=31.7% (+1.1pp over v17), s=35.6% (-0.9pp)\nNotes: SGD provided modest gains for n-size but slightly hurt s-size. The cost volume model may already be well-optimized by AdamW for 200 epochs.\nv19 — m-Size Cost Volume Config: m-size model, batch=32 (memory limited), lr=0.001 (lower for larger model).\nResults: m=37.7%\nNotes: Medium model provides +1.2pp over s-size v17, but requires 4x smaller batch size and longer training.\nv20 — Depth-Only Cost Volume Routing Goal: Solve the 2D-3D task conflict. v19’s m-size model had AP3D=37.7% but mAP50(2D)=63.7%. The cost volume features diluted P3, hurting 2D box detection.\nArchitecture change: Cost volume output is passed as a 4th input to the head (alongside P3, P4, P5). The head concatenates it only with P3 features for the depth branches (lr_distance, depth). The 2D detection branches and geometry branches see clean P3/P4/P5.\n# Head receives [P3, P4, P5, cost_vol] # cost_vol concatenated ONLY with P3 for lr_distance and depth branches # box, cls, dimensions, orientation see clean P3/P4/P5 Results: n=28.8%, s=32.7%, m=33.5%\nNotes: Initial AP3D is slightly lower than merged (v17), but mAP50(2D) recovers significantly. The hypothesis was that SGD finetuning (v21) would close the AP3D gap while maintaining better 2D detection.\nv21 — SGD Finetune: Merged vs Depth-Only Goal: Fair comparison of merged vs depth-only cost volume after SGD finetuning.\nResults:\nSize Merged (v21) Depth-Only (v21) Winner n 31.7% 34.0% Depth-only +2.3pp s 35.6% 40.2% Depth-only +4.6pp m 38.9% 37.7% Merged +1.2pp Conclusion: Depth-only routing wins convincingly at n/s sizes. The clean P3 features give the 2D detector better anchoring, which cascades to better 3D predictions because depth branches use higher-quality TAL assignments. The s-size depth-only model at 40.2% AP3D@0.5 is the overall best result.\nFor m-size, merged still wins — possibly because the larger model has enough capacity to handle the mixed features.\nv22 — Depth Prior (7-Channel RAFT-Stereo Input) Goal: Provide precomputed high-quality disparity from RAFT-Stereo as a 7th input channel.\nArchitecture: Standard 6-channel model with groups=1 first layer (no group-conv stem since the 7th channel is already a depth signal). RAFT-Stereo disparity maps precomputed offline, scaled to [0,255] uint8.\nResults: n=34.5%, s=39.0%\nConclusion: Competitive with cost volume (s: 39.0% vs 40.2%) but requires offline RAFT-Stereo inference (~3s/frame). Since the learned cost volume matches or exceeds this without the external dependency, the depth prior approach was abandoned.\nv23–v25 — Knowledge Distillation (All Failed) Goal: Transfer depth knowledge from a teacher model (trained with RAFT-Stereo depth prior) to a student model (6-channel only).\nVersion Method n-size s-size vs v21 baseline v23 Disparity distillation (weight=1.0) 28.1% 33.9% -6pp / -6pp v24 Disparity distillation (weight=0.05) 28.5% 33.4% -6pp / -7pp v25 Feature distillation (MSE on P3) 31.1% 33.0% -3pp / -7pp Failure analysis: All distillation approaches significantly hurt performance. The teacher’s depth prior features are fundamentally different from the student’s learned stereo features. Forcing the student to mimic the teacher’s representations interferes with its own stereo matching learning. The distillation loss competes with the primary 3D losses rather than complementing them.\nAll RAFT-Stereo code (depth prior, distillation) was removed from the codebase after these experiments confirmed no benefit.\nv26 — 1000-Epoch SGD Training Goal: Test whether much longer training improves the cost volume model.\nConfig: s-size, SGD lr=0.01, cosine to 0.01, 1000 epochs from v21 checkpoint, same augmentation.\nResults: s=46.4% AP3D@0.5 at epoch 550\nNotes: A significant +6.2pp improvement over v21 (40.2%), confirming that the model was still underfitting at 200ep SGD. However, a critical bug meant best.pt was saved at the wrong epoch (see v30). The true peak was identified by manual analysis of validation logs.\nv27–v29 — Multi-Scale Cost Volume Pyramid (All Failed) Goal: Provide multi-resolution stereo cues with cost volumes at multiple strides (1/4, 1/8, 1/16).\nArchitecture: Three cost volumes at increasing strides, each providing disparity features at different spatial resolutions. Hypothesis: coarse cost volumes capture large disparities (nearby objects), fine cost volumes capture small disparities (distant objects).\nResults:\nv28 (ms + disp w=1.0): s=39.5% — disparity loss consumed 87% of total gradient v29 (ms + disp w=0.05): s=39.6% — balanced loss didn’t help v29 (ms + no disp loss): s=38.9% — architecture itself hurts Why it failed: The multi-scale pyramid introduced redundant, coarser-resolution features that diluted the fine-grained stride-4 cost volume signal. The single-scale approach preserves the highest spatial resolution where sub-pixel disparity estimation is most precise. Additionally, the added parameters and computation didn’t translate to better gradient signal — the network had more capacity but worse information quality.\nConclusion: Single-scale stride-4 cost volume is optimal. All multi-scale code was removed from the codebase.\nv30 — Fitness Function Bugfix Goal: Re-run v26 setup with corrected model selection.\nBug: val.py:get_stats() merged 3D and 2D metrics dicts with {**3d_metrics, **det_metrics}. Both contained a fitness key. Because det_metrics came second, the 2D fitness (based on mAP50-95) silently overwrote the 3D fitness (based on AP3D@0.5). Result: best.pt was saved when 2D detection peaked, not when 3D detection peaked.\nImpact: v26’s saved best.pt had AP3D@0.5 of only 25.5%, despite the model reaching 46.4% at epoch 550.\nFix: Pop fitness from det_metrics before merge; place 3D metrics last to ensure 3D fitness takes priority. Also fixed per-threshold GT matching and relaxed depth clamp from 1m to ~0m.\nResults: s=46.4% — matches v26’s true peak, confirming the fix works correctly.\nv31 — DFL-Style Depth Bin Classification Goal: Replace scalar depth regression with classification over depth bins, using Distribution Focal Loss (DFL).\nMotivation: DFL is proven in YOLO’s bbox regression (reg_max=16). The same principle — learn a discrete distribution over bin values, then decode via weighted sum — should apply to depth prediction. Classification avoids the gradient magnitude issues of regression on log-depth scalars.\nArchitecture changes:\nDepth branch outputs 16 channels (was 1) representing bin logits Bins span log-depth range: linspace(log(2m), log(80m), 16) — bin width ≈ 0.245 in log-space DepthDFL module decodes: softmax(logits) → weighted sum by bin_values → log-depth Loss: DFLoss (from YOLO’s existing implementation) replaces smooth_l1 for depth Training exposes both raw bin logits (for DFLoss) and decoded log-depth (for downstream) Inference outputs only decoded log-depth — downstream pipeline unchanged Results: s=53.0% (+6.6pp over v30), n=41.3% — biggest single-change improvement since the cost volume (v17)\nWhy it works:\nDFLoss (cross-entropy with soft binning) provides more stable gradients than smooth_l1 on unbounded log-depth values The softmax output naturally represents prediction confidence — ambiguous depths spread probability across bins rather than committing to a wrong scalar 16 bins over log(2)–log(80) match the depth distribution of KITTI objects well Only the final conv per scale changes (1→16 channels) — ~0% parameter overhead since most depth branch params are in the 3-layer hidden layers Training dynamics: s peaked at epoch 700, n peaked at epoch 360 (both with 1000ep budget, patience=200).\nv32 — Depth Residual Offset (Failed) Goal: Add sub-bin precision by learning a continuous residual offset on top of the coarse bin-decoded depth.\nMotivation: With 16 bins over log(2)–log(80), bin width is ~0.245 in log-space. At 20m depth, this corresponds to ~±2.5m quantization error. A learned residual could recover this lost precision without disrupting the DFL training signal.\nArchitecture changes:\nDepth branch outputs 17 channels (16 bins + 1 residual) DepthDFL splits input: bins[:16] for softmax decode, residual[16:] added to coarse depth Loss: DFLoss(bins) + smooth_l1(residual, gt_depth - coarse_depth.detach()) Single “depth” loss slot maintained — 6-item loss vector unchanged Results: s=48.8% (-4.2pp regression), best at epoch 290, early stopped at epoch 490\nWhy it failed: The residual channel interferes with the bin classification training signal, even though the residual target is detached from the bin gradients. Possible mechanisms:\nThe shared hidden layers (3×Conv) must now serve two objectives (classification bins + regression residual) through the same features, creating an optimization conflict The smooth_l1 residual loss provides gradients that compete with DFLoss gradients in the shared layers The residual initializes randomly near zero, which is correct, but the initial noise may destabilize early bin learning when training from a pretrained checkpoint Decision: Reverted. The 16-bin DFL approach (v31) remains optimal.\nv33a — Depth Loss Weight 3.0 Goal: Give depth more gradient by increasing its loss weight from 1.0 to 3.0.\nMotivation: The box loss weight is 7.5, cls is 0.5. Depth at 1.0 may be under-represented in the total gradient, causing the shared backbone to prioritize 2D detection features over depth features. Tripling the depth weight should shift the balance.\nConfig: Same as v31 except depth: 3.0 in YAML loss_weights. s-size, SGD 1000ep, GPUs 0-3.\nResults: s=56.5% AP3D@0.5, 38.0% AP3D@0.7 — +3.5pp over v31, new best (non-R40)\nR40 results (KITTI-standard, Moderate mean): AP3D@0.5=47.3%, AP3D@0.7=28.1%\nBest at epoch 240, early stopped at epoch 440. Simple loss weight tuning outperformed all architecture changes (residual, 32 bins).\nv33b — 32 Depth Bins Goal: Halve the bin width by doubling from 16 to 32 bins.\nMotivation: v32’s residual approach to sub-bin precision failed, but finer bins via pure DFL is the clean alternative. 32 bins over log(2)–log(80) gives bin width ≈ 0.122 in log-space (half of 16-bin). At 20m, quantization error drops from ~±2.5m to ~±1.2m.\nConfig: DEPTH_BINS=32 in head_yolo11.py. s-size, SGD 1000ep from v31 best.pt, GPUs 4-7.\nResults: s=56.2% AP3D@0.5, 35.9% AP3D@0.7 — +3.2pp over v31, but slightly worse than v33a\nBest at epoch 220, early stopped at epoch 420. More bins ≈ same AP3D@0.5 but weaker AP3D@0.7. Not worth the complexity — 16 bins remain optimal.\nv34 — YOLO26 Backbone + R40 Evaluation Goal: Evaluate YOLO26 backbone across all model sizes with KITTI-standard R40 evaluation.\nChanges:\nSwitched from YOLO11 to YOLO26 backbone (same cost volume architecture) Implemented KITTI R40 AP evaluation: 40-point max-precision-at-recall-threshold with difficulty splits (Easy/Moderate/Hard) Trained all sizes (n/s/m/l) with SGD 1000ep, filter_occluded=True Results (R40 Moderate Mean AP3D):\nSize Params AP3D@0.5 AP3D@0.7 n 3.6M 42.4% 24.8% s 11.6M 49.8% 30.7% m 26.7M 49.0% 31.2% l 31.1M 47.5% 30.2% Conclusion: s-size is the sweet spot. m/l overfit on KITTI’s small training set (~3,700 images). The diminishing returns beyond s confirm that the bottleneck is data, not model capacity.\nv35 — Occlusion Filter Disabled Goal: Train on ALL objects including heavily occluded (KITTI occlusion levels 0-2 + DontCare), letting the KITTI difficulty system handle evaluation filtering.\nMotivation: With filter_occluded=True, ~25% of training labels were discarded (occluded objects). The KITTI R40 difficulty system already accounts for occlusion (Easy: occ==0, Moderate: occ\u003c=1, Hard: occ\u003c=2). Training on all objects should improve Hard difficulty without hurting Easy.\nConfig: YOLO26-s, SGD 1000ep, filter_occluded=False. Otherwise same as v34.\nResults (R40, per-class and difficulty):\nClass Easy@0.5 Mod@0.5 Hard@0.5 Easy@0.7 Mod@0.7 Hard@0.7 Car 72.8% 71.8% 67.9% 36.8% 41.2% 39.6% Ped 49.4% 42.4% 38.5% 31.2% 27.0% 24.4% Cyc 27.1% 30.1% 28.4% 17.5% 22.1% 20.8% Mean Moderate: AP3D@0.5=48.1%, AP3D@0.7=30.1% Mean Hard: AP3D@0.5=44.9%, AP3D@0.7=28.3%\nvs v34 (filter ON): Moderate -1.7pp @0.5, but Hard +3.5pp @0.5, +3.0pp @0.7. Car Hard@0.5: 55.7%→67.9% (+12.2pp). Much better robustness to occluded/truncated objects.\nBest at epoch 210, early stopped at epoch 410.\nv36 — Siamese Weight-Shared Backbone Goal: Replace groups=2 stem with a siamese/weight-shared backbone for 100% pretrained weight compatibility and clean left-only 2D features.\nArchitecture (see §2.7): Standard 3ch YOLO26 backbone processes L/R images via batch trick [2B,3,H,W]. Features are split at the tap point (backbone layer 1, stride 4) for cost volume computation. Only left features continue through the remaining backbone and head.\nConfig: YOLO26 + siamese, SGD 1000ep, filter_occluded=False, 6 GPUs. Same recipe as v35.\nR40 Results (KITTI-standard, 3-class multi-class):\nSize Params Mean Mod @0.5 Mean Mod @0.7 Car Mod @0.5 Car Mod @0.7 n 3.6M 48.1% 29.9% 70.7% 42.4% s 11.6M 48.3% 29.4% 71.7% 42.3% m 26.7M 49.0% 29.1% 71.1% 39.1% l 31.2M 50.9% 31.6% 71.3% 41.8% vs v35 (groups=2, R40 Moderate):\nMetric v35-s v36-s v36-l Δ (s) Δ (l) Mean @0.5 48.1% 48.3% 50.9% +0.2 +2.8 Mean @0.7 30.1% 29.4% 31.6% -0.7 +1.5 Car @0.5 71.8% 71.7% 71.3% -0.1 -0.5 Car @0.7 41.2% 42.3% 41.8% +1.1 +0.6 Key finding: Siamese matches groups=2 at R40 level across all sizes. l-size (50.9%) is new best Mean Moderate AP3D@0.5, unlike groups=2 where l overfits. The siamese shared backbone may regularize better at larger model sizes.\nCar-only (nc=1) training FAILED: s=2.87% AP3D@0.5, n=2.16% after 280 epochs. Depth DFLoss stuck at ~5.0 (3-class converges to 2.5 by ep10). Model predicts all depths at ~17-18m (depth branch collapsed). Root cause: TAL with nc=1 binary classifier provides insufficient gradient diversity for auxiliary branches. Workaround: use per-class Car results from multi-class model for benchmark tables.\nSpeed benchmarks (single Blackwell RTX PRO 6000, batch=1, fp16, 384×1248):\nSize Params GFLOPs Inference FPS n 3.6M 7.3G 7.9ms 127 s 11.6M 18.5G 8.2ms 122 m 26.8M 60.9G 9.0ms 111 l 31.2M — 13.9ms 72 All sizes are well within real-time (\u003e30 FPS). n-size at 127 FPS is attractive for deployment.\nStatus: Complete. All 4 sizes evaluated with R40. Car-only nc=1 approach abandoned (use multi-class per-class results).\n6. Key Findings 6.1 What Worked StereoCostVolume (+18pp): The single biggest architectural improvement. Explicit disparity correlation at 24 offsets provides stereo matching cues that the backbone cannot learn implicitly. Cost: only +0.7% parameters.\nDFL-Style Depth Bins (+6.6pp): Replacing scalar depth regression with 16-bin classification using Distribution Focal Loss. Provides more stable gradients and natural confidence calibration. The second-largest single-change improvement.\nLong SGD Training (+6pp): Extending from 200 to 1000 SGD epochs yielded +6.2pp for s-size. The model was significantly underfitting at 200 epochs.\nDepth-Only Cost Volume Routing (+2-5pp over merged): Separating 2D detection from 3D depth estimation in the head avoids task conflict. P3 stays clean for 2D boxes; cost volume enriches only depth branches.\nSGD Finetuning (+6-8pp): Consistently improves over AdamW-only training. Two-stage recipe (200ep AdamW → 200ep SGD) is better than pure SGD.\nLoss Weight Rebalancing (+1-2pp): Increasing depth loss weights from 0.1 to 1.0 (and lr_distance from 0.2 to 2.0) ensures the network actually optimizes for depth, which was previously dwarfed by the box loss (7.5).\nLog-Space Depth Targets (+14pp): Converting lr_distance targets from raw disparity [0.01, 0.22] to log-space [-4.6, -1.5] dramatically improved training stability. AP3D@0.5 tripled from 7.4% to 21.1%.\nAugmentation (+1-2pp): Stereo-safe augmentations (horizontal flip with view swap, HSV) provide modest regularization benefit.\nSiamese Backbone (v36): Weight-shared 3ch backbone via batch trick matches groups=2 quality with 100% pretrained weight compatibility. n-size matches s-size on KITTI — 3.2x fewer params for equal accuracy.\nDisabling Occlusion Filter (v35, +3.5pp Hard): Training on all objects including heavily occluded improves Hard difficulty by +3.5pp @0.5 with only -1.7pp Moderate regression. Car Hard@0.5: +12.2pp.\n6.2 What Didn’t Work Laplacian NLL Loss (v8): Loss went negative from epoch 4 — the network learned to predict infinite uncertainty to zero out the loss.\nInline StereoCorrelation (v9-v11): Inserting correlation into the main feature pathway is neutral. Unlike the cost volume (separate pathway to depth branches), inline correlation dilutes backbone features.\nDistance-Aware Loss Weighting (v9-v10): Weighting closer objects higher didn’t help — the TAL assignment already biases toward well-matched (often closer) objects.\nSigma/Uncertainty Supervision (v10): Training the network to predict its own uncertainty for decode-time fusion created optimization conflicts.\nRAFT-Stereo Depth Prior (v22): Competitive but adds offline RAFT-Stereo dependency (~3s/frame). Not worth the complexity vs the learned cost volume.\nKnowledge Distillation (v23-v25): All variants hurt performance by 3-7pp. Teacher and student learn fundamentally different representations.\nYOLO26 Backbone (v15-v16): Marginal improvement (~1pp) over YOLO11. Architecture is not the bottleneck.\nMulti-Scale Cost Volume (v27-v29): All variants worse than single-scale. The coarser resolution loses the sub-pixel precision that matters for depth. Architecture itself hurt even without disparity loss.\nCar-Only Single-Class Training (v36): nc=1 models completely fail — depth branch collapses (DFLoss stuck at 5.0, all predictions at ~17m). TAL with binary classifier provides insufficient gradient diversity for auxiliary 3D branches. Use per-class results from multi-class models instead.\nDepth Residual Offset (v32): Adding a regression channel alongside DFL bins hurt by -4.2pp. The shared hidden layers can’t serve both classification and regression well. Sub-bin precision is not the current bottleneck.\nFitness Function Bug (v30): Silently saving best.pt by 2D fitness instead of 3D fitness caused all prior experiments to report wrong best checkpoints. Always verify that your selection metric matches your evaluation metric.\n32 Depth Bins (v33b): 32 bins ≈ same AP3D@0.5 as 16 bins but slightly worse @0.7. Not worth the added complexity.\n6.3 Lessons Learned Isolate variables: v9 combined 3 changes and was impossible to interpret. v11 (single change) clearly showed StereoCorrelation is neutral. Depth is the #1 bottleneck: Oracle analysis shows +17pp headroom from perfect depth (at current v31 level). Every successful experiment directly improved depth estimation. 2D-3D task conflict is real: Routing cost volume features only to depth branches (v20) outperforms merging into P3 (v17) by 2-5pp. Classification \u003e regression for depth: DFL bins (+6.6pp) succeeded where all regression enhancements (Laplacian, uncertainty, residual) failed. Discrete distributions are more trainable than unbounded scalars. Don’t add complexity to working losses: Residual, uncertainty, distance-weighting — every attempt to “improve” the depth loss made it worse. The simplest loss (DFLoss for bins, smooth_l1 for other aux) is the best. s-size is the sweet spot (groups=2), n-size for siamese: With groups=2 backbone, s-size outperforms n by 3-6pp. But with siamese backbone (v36), n matches s — 3.2x fewer params for equal accuracy. KITTI’s small dataset limits larger models. Train longer: v26/v30 showed +6pp from 200→1000 epochs. v31 peaked at ep700. Don’t underestimate the value of patience. Simple weight tuning \u003e architecture changes: v33a (depth loss 1.0→3.0) gained +3.5pp with zero code changes, beating depth residual (v32, -4.2pp) and 32 bins (v33b, +3.2pp). 7. Error Analysis Oracle ablation analysis (substituting one predicted component with ground truth) on the v12 checkpoint:\nOracle Component AP3D@0.5 AP3D@0.7 Change vs Baseline Baseline (no oracle) 28.5% 17.5% — Oracle Depth 54.5% 49.6% +26.0pp / +32.1pp Oracle Dimensions 28.7% 18.3% +0.2pp / +0.8pp Oracle Orientation 24.2% 14.0% -4.3pp / -3.5pp Oracle All 49.1% 48.9% +20.6pp / +31.4pp Per-Component Error Statistics Component Mean Error Median Error Relative Error Depth 0.81m 0.66m 5.1% Dimensions (L) 0.20m — — Dimensions (W) 0.05m — — Dimensions (H) 0.05m — — Orientation 16.4° 6.6° — Interpretation Depth is overwhelmingly the bottleneck: Perfect depth would nearly double AP3D@0.5. This motivated the cost volume experiments (v17+). Dimensions are solved: Oracle dims provide only +0.2pp. The normalized offset prediction with class-specific priors works well. Orientation oracle hurts: The -4.3pp drop suggests a matching artifact — oracle orientation changes the 3D IoU in unexpected ways due to the interaction between box center and heading angle. 8. Failed Approaches 8.1 Laplacian NLL (v8) Hypothesis: Per-sample uncertainty would down-weight hard examples and improve depth estimation.\nWhy it failed: The loss function L = |y - pred| * exp(-log_sigma) + log_sigma has a pathological minimum at log_sigma → ∞, which drives the loss to -∞. Without careful regularization, the network exploits this by predicting maximum uncertainty for all samples.\n8.2 StereoCorrelation Module (v9-v11) Hypothesis: Explicit left-right correlation features would improve depth.\nWhy it failed: When inserted into the main backbone pathway, correlation features compete with appearance features needed for 2D detection and classification. The cost volume approach (v17) succeeds because it provides correlation as a separate, additive signal only to depth branches.\n8.3 RAFT-Stereo Distillation (v23-v25) Hypothesis: A student model could learn to predict RAFT-quality depth without the RAFT-Stereo network at inference time.\nWhy it failed: RAFT-Stereo produces dense, high-precision disparity maps using iterative refinement — a fundamentally different representation than the sparse, per-anchor predictions of the YOLO head. Forcing alignment between these representations through MSE or L1 distillation creates conflicting gradients with the primary 3D detection loss.\n8.4 Combined Changes (v9, v10) Hypothesis: Multiple improvements should compound.\nWhy it failed: Optimization dynamics are nonlinear. Each change shifts the loss landscape, and combinations can create interference patterns. v9 combined 3 changes and only improved n-size while catastrophically hurting s/m. The lesson: always test changes in isolation first.\n8.5 Multi-Scale Cost Volume Pyramid (v27-v29) Hypothesis: Cost volumes at multiple resolutions (stride 4, 8, 16) would capture disparities at different scales.\nWhy it failed: The coarser cost volumes (stride 8, 16) lose spatial precision without providing useful additional information. Depth estimation is fundamentally a high-resolution matching task — coarse features add noise, not signal. Even without the disparity loss (v29 no-disp), the multi-scale architecture alone hurt by -7.5pp vs single-scale.\n8.6 Depth Residual Offset (v32) Hypothesis: A learned residual on top of DFL bin-decoded depth would provide sub-bin precision.\nWhy it failed: The 17th channel (residual) shares the same 3-layer hidden network as the 16 bin logits. The smooth_l1 regression gradient from the residual competes with the DFL classification gradient from the bins in the shared layers, degrading both tasks. The residual target (gt - coarse_depth.detach()) was correctly computed without gradient flow, but the shared features still suffered from the multi-task conflict. Result: -4.2pp regression.\n9. Current Best Configuration Model # yolo26s-stereo3ddet-siamese.yaml (v36 — recommended) Architecture: YOLO26 backbone + siamese weight-shared + StereoCostVolume Input: 6 channels (left RGB + right RGB), processed as [2B,3,H,W] batch trick Cost volume: 24 disparity bins, 64 output channels, routed to depth branches only Head: Stereo3DDetHeadYOLO11 with P3/P4/P5 + cost_vol input Pretrained: 100% compatible with standard YOLO26 weights Alternative (v35): yolo26s-stereo3ddet-costvol.yaml with groups=2 stem — slightly higher Moderate AP but no pretrained compatibility.\nTraining Recipe SGD lr=0.01, cosine decay to lr*0.01, 1000 epochs Augmentation: fliplr=0.5, hsv_h=0.015, hsv_s=0.4, hsv_v=0.3 Batch: 128 (n), 64 (s), 32 (m), 16 (l) Image size: 384x1248 Patience: 200 (early stopping based on AP3D@0.5 fitness) filter_occluded: False (train on all objects including heavily occluded) Depth Branch Output: 16 channels (DFL bins in log-depth space) Bin range: linspace(log(2m), log(80m), 16) — bin width ≈ 0.245 log-units Decode: softmax(logits) → weighted sum → log-depth scalar Loss: DFLoss (cross-entropy with soft binning) Architecture: 3×Conv deep branch per scale, cost volume concat at P3 Loss Weights lr_distance: 2.0 # log-space disparity depth: 3.0 # DFL bin classification (log-space direct depth) dimensions: 1.0 # normalized offset orientation: 1.0 # sin/cos encoding box: 7.5 # standard YOLO box loss cls: 0.5 # standard YOLO cls loss Best Results R40 evaluation (KITTI-standard, v36 siamese):\nSize Mean Mod @0.5 Mean Mod @0.7 Car Mod @0.5 Car Mod @0.7 FPS n 48.1% 29.9% 70.7% 42.4% 127 s 48.3% 29.4% 71.7% 42.3% 122 m 49.0% 29.1% 71.1% 39.1% 111 l 50.9% 31.6% 71.3% 41.8% 72 Remaining Headroom Oracle analysis (from v12 baseline) showed +26pp from perfect depth. Remaining depth error is primarily in feature extraction and stereo matching quality, not the output representation.\nPotential future directions:\nWider cost volume disparity coverage (currently 24 offsets × 2px = 48px at stride 4 → max ~192px full-res) Higher resolution training (384×1248 → 480×1560) Attention-based cost volume (replace dot-product with cross-attention) Test pretrained weight loading with siamese backbone (main benefit not yet exploited) Curriculum learning or multi-task pretraining to improve auxiliary branch gradient quality ",
+  "wordCount" : "6720",
+  "inLanguage": "en",
+  "datePublished": "2026-03-08T00:00:00Z",
+  "dateModified": "2026-03-08T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Bowei Hou"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://bovey0809.github.io/publications/yolo3d-experiments/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Codemylife",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://bovey0809.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://bovey0809.github.io/" accesskey="h" title="Codemylife (Alt + H)">Codemylife</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://bovey0809.github.io/publications/" title="Publications">
+                    <span>Publications</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://bovey0809.github.io/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://bovey0809.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://bovey0809.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://bovey0809.github.io/publications/">Publications</a></div>
+    <h1 class="post-title entry-hint-parent">
+      YOLO3D Stereo 3D Detection -- Experiments Report
+    </h1>
+    <div class="post-meta"><span title='2026-03-08 00:00:00 +0000 UTC'>March 8, 2026</span>&nbsp;·&nbsp;<span>32 min</span>&nbsp;·&nbsp;<span>Bowei Hou</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#stereo-3d-detection-experiments-report" aria-label="Stereo 3D Detection Experiments Report">Stereo 3D Detection Experiments Report</a><ul>
+                        
+                <li>
+                    <a href="#table-of-contents" aria-label="Table of Contents">Table of Contents</a></li>
+                <li>
+                    <a href="#1-project-overview" aria-label="1. Project Overview">1. Project Overview</a></li>
+                <li>
+                    <a href="#2-architecture" aria-label="2. Architecture">2. Architecture</a><ul>
+                        
+                <li>
+                    <a href="#21-backbone-siameseweight-shared-v36-current-best" aria-label="2.1 Backbone: Siamese/Weight-Shared (v36&#43;, current best)">2.1 Backbone: Siamese/Weight-Shared (v36+, current best)</a></li>
+                <li>
+                    <a href="#22-stereo-cost-volume-v17" aria-label="2.2 Stereo Cost Volume (v17&#43;)">2.2 Stereo Cost Volume (v17+)</a></li>
+                <li>
+                    <a href="#23-detection-head-stereo3ddetheadyolo11" aria-label="2.3 Detection Head: Stereo3DDetHeadYOLO11">2.3 Detection Head: Stereo3DDetHeadYOLO11</a></li>
+                <li>
+                    <a href="#24-loss-function-stereo3ddetlossyolo11" aria-label="2.4 Loss Function: Stereo3DDetLossYOLO11">2.4 Loss Function: Stereo3DDetLossYOLO11</a></li>
+                <li>
+                    <a href="#25-depth-decoding-inference" aria-label="2.5 Depth Decoding (Inference)">2.5 Depth Decoding (Inference)</a></li>
+                <li>
+                    <a href="#26-post-processing-pipeline" aria-label="2.6 Post-Processing Pipeline">2.6 Post-Processing Pipeline</a></li>
+                <li>
+                    <a href="#27-alternative-group-conv-stem-v35-and-earlier" aria-label="2.7 Alternative: Group-Conv Stem (v35 and earlier)">2.7 Alternative: Group-Conv Stem (v35 and earlier)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#3-experiment-timeline" aria-label="3. Experiment Timeline">3. Experiment Timeline</a><ul>
+                        
+                <li>
+                    <a href="#phase-1-baseline--training-recipe-v3v7" aria-label="Phase 1: Baseline &amp; Training Recipe (v3–v7)">Phase 1: Baseline &amp; Training Recipe (v3–v7)</a></li>
+                <li>
+                    <a href="#phase-2-loss--module-experiments-v8v11" aria-label="Phase 2: Loss &amp; Module Experiments (v8–v11)">Phase 2: Loss &amp; Module Experiments (v8–v11)</a></li>
+                <li>
+                    <a href="#phase-3-augmentation--depth-rebalancing-v12v14" aria-label="Phase 3: Augmentation &amp; Depth Rebalancing (v12–v14)">Phase 3: Augmentation &amp; Depth Rebalancing (v12–v14)</a></li>
+                <li>
+                    <a href="#phase-4-architecture-comparison-v15v16" aria-label="Phase 4: Architecture Comparison (v15–v16)">Phase 4: Architecture Comparison (v15–v16)</a></li>
+                <li>
+                    <a href="#phase-5-cost-volume-v17v21" aria-label="Phase 5: Cost Volume (v17–v21)">Phase 5: Cost Volume (v17–v21)</a></li>
+                <li>
+                    <a href="#phase-6-raft-stereo--distillation--all-failed-v22v25" aria-label="Phase 6: RAFT-Stereo &amp; Distillation — All Failed (v22–v25)">Phase 6: RAFT-Stereo &amp; Distillation — All Failed (v22–v25)</a></li>
+                <li>
+                    <a href="#phase-7-long-training--bug-fixes-v26v30" aria-label="Phase 7: Long Training &amp; Bug Fixes (v26–v30)">Phase 7: Long Training &amp; Bug Fixes (v26–v30)</a></li>
+                <li>
+                    <a href="#phase-8-depth-output-representation-v31v33" aria-label="Phase 8: Depth Output Representation (v31–v33)">Phase 8: Depth Output Representation (v31–v33)</a></li>
+                <li>
+                    <a href="#phase-9-yolo26-backbone-evaluation--siamese-architecture-v34v36" aria-label="Phase 9: YOLO26 Backbone, Evaluation &amp; Siamese Architecture (v34–v36)">Phase 9: YOLO26 Backbone, Evaluation &amp; Siamese Architecture (v34–v36)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#4-results-summary" aria-label="4. Results Summary">4. Results Summary</a><ul>
+                        
+                <li>
+                    <a href="#41-complete-results-table" aria-label="4.1 Complete Results Table">4.1 Complete Results Table</a></li>
+                <li>
+                    <a href="#42-top-5-results-r40-moderate-mean" aria-label="4.2 Top 5 Results (R40 Moderate Mean)">4.2 Top 5 Results (R40 Moderate Mean)</a></li>
+                <li>
+                    <a href="#43-progression-chart-s-size-" aria-label="4.3 Progression Chart (s-size AP3D@0.5)">4.3 Progression Chart (s-size AP3D@0.5)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#5-detailed-experiment-notes" aria-label="5. Detailed Experiment Notes">5. Detailed Experiment Notes</a><ul>
+                        
+                <li>
+                    <a href="#v5--baseline-100ep-adamw-no-augmentation" aria-label="v5 — Baseline (100ep AdamW, No Augmentation)">v5 — Baseline (100ep AdamW, No Augmentation)</a></li>
+                <li>
+                    <a href="#v7--sgd-finetune-200ep-sgd-from-v5" aria-label="v7 — SGD Finetune (200ep SGD from v5)">v7 — SGD Finetune (200ep SGD from v5)</a></li>
+                <li>
+                    <a href="#v8--laplacian-uncertainty-loss" aria-label="v8 — Laplacian Uncertainty Loss">v8 — Laplacian Uncertainty Loss</a></li>
+                <li>
+                    <a href="#v9--stereocorrelation--uncertainty-fusion--distance-aware-loss" aria-label="v9 — StereoCorrelation &#43; Uncertainty Fusion &#43; Distance-Aware Loss">v9 — StereoCorrelation + Uncertainty Fusion + Distance-Aware Loss</a></li>
+                <li>
+                    <a href="#v10--correlation--fixed-loss" aria-label="v10 — Correlation &#43; Fixed Loss">v10 — Correlation + Fixed Loss</a></li>
+                <li>
+                    <a href="#v11--correlation-only-original-loss" aria-label="v11 — Correlation Only (Original Loss)">v11 — Correlation Only (Original Loss)</a></li>
+                <li>
+                    <a href="#v12--augmentation--depth-loss-rebalancing" aria-label="v12 — Augmentation &#43; Depth Loss Rebalancing">v12 — Augmentation + Depth Loss Rebalancing</a></li>
+                <li>
+                    <a href="#v13--sgd-finetune-from-v12" aria-label="v13 — SGD Finetune from v12">v13 — SGD Finetune from v12</a></li>
+                <li>
+                    <a href="#v14--sgd-from-scratch" aria-label="v14 — SGD from Scratch">v14 — SGD from Scratch</a></li>
+                <li>
+                    <a href="#v15--yolo26-vs-yolo11" aria-label="v15 — YOLO26 vs YOLO11">v15 — YOLO26 vs YOLO11</a></li>
+                <li>
+                    <a href="#v16--sgd-finetune-from-v15" aria-label="v16 — SGD Finetune from v15">v16 — SGD Finetune from v15</a></li>
+                <li>
+                    <a href="#v17--stereocostvolume-merged-into-p3" aria-label="v17 — StereoCostVolume (Merged into P3)">v17 — StereoCostVolume (Merged into P3)</a></li>
+                <li>
+                    <a href="#v18--cost-volume-sgd-finetune" aria-label="v18 — Cost Volume SGD Finetune">v18 — Cost Volume SGD Finetune</a></li>
+                <li>
+                    <a href="#v19--m-size-cost-volume" aria-label="v19 — m-Size Cost Volume">v19 — m-Size Cost Volume</a></li>
+                <li>
+                    <a href="#v20--depth-only-cost-volume-routing" aria-label="v20 — Depth-Only Cost Volume Routing">v20 — Depth-Only Cost Volume Routing</a></li>
+                <li>
+                    <a href="#v21--sgd-finetune-merged-vs-depth-only" aria-label="v21 — SGD Finetune: Merged vs Depth-Only">v21 — SGD Finetune: Merged vs Depth-Only</a></li>
+                <li>
+                    <a href="#v22--depth-prior-7-channel-raft-stereo-input" aria-label="v22 — Depth Prior (7-Channel RAFT-Stereo Input)">v22 — Depth Prior (7-Channel RAFT-Stereo Input)</a></li>
+                <li>
+                    <a href="#v23v25--knowledge-distillation-all-failed" aria-label="v23–v25 — Knowledge Distillation (All Failed)">v23–v25 — Knowledge Distillation (All Failed)</a></li>
+                <li>
+                    <a href="#v26--1000-epoch-sgd-training" aria-label="v26 — 1000-Epoch SGD Training">v26 — 1000-Epoch SGD Training</a></li>
+                <li>
+                    <a href="#v27v29--multi-scale-cost-volume-pyramid-all-failed" aria-label="v27–v29 — Multi-Scale Cost Volume Pyramid (All Failed)">v27–v29 — Multi-Scale Cost Volume Pyramid (All Failed)</a></li>
+                <li>
+                    <a href="#v30--fitness-function-bugfix" aria-label="v30 — Fitness Function Bugfix">v30 — Fitness Function Bugfix</a></li>
+                <li>
+                    <a href="#v31--dfl-style-depth-bin-classification" aria-label="v31 — DFL-Style Depth Bin Classification">v31 — DFL-Style Depth Bin Classification</a></li>
+                <li>
+                    <a href="#v32--depth-residual-offset-failed" aria-label="v32 — Depth Residual Offset (Failed)">v32 — Depth Residual Offset (Failed)</a></li>
+                <li>
+                    <a href="#v33a--depth-loss-weight-30" aria-label="v33a — Depth Loss Weight 3.0">v33a — Depth Loss Weight 3.0</a></li>
+                <li>
+                    <a href="#v33b--32-depth-bins" aria-label="v33b — 32 Depth Bins">v33b — 32 Depth Bins</a></li>
+                <li>
+                    <a href="#v34--yolo26-backbone--r40-evaluation" aria-label="v34 — YOLO26 Backbone &#43; R40 Evaluation">v34 — YOLO26 Backbone + R40 Evaluation</a></li>
+                <li>
+                    <a href="#v35--occlusion-filter-disabled" aria-label="v35 — Occlusion Filter Disabled">v35 — Occlusion Filter Disabled</a></li>
+                <li>
+                    <a href="#v36--siamese-weight-shared-backbone" aria-label="v36 — Siamese Weight-Shared Backbone">v36 — Siamese Weight-Shared Backbone</a></li></ul>
+                </li>
+                <li>
+                    <a href="#6-key-findings" aria-label="6. Key Findings">6. Key Findings</a><ul>
+                        
+                <li>
+                    <a href="#61-what-worked" aria-label="6.1 What Worked">6.1 What Worked</a></li>
+                <li>
+                    <a href="#62-what-didnt-work" aria-label="6.2 What Didn&rsquo;t Work">6.2 What Didn&rsquo;t Work</a></li>
+                <li>
+                    <a href="#63-lessons-learned" aria-label="6.3 Lessons Learned">6.3 Lessons Learned</a></li></ul>
+                </li>
+                <li>
+                    <a href="#7-error-analysis" aria-label="7. Error Analysis">7. Error Analysis</a><ul>
+                        
+                <li>
+                    <a href="#per-component-error-statistics" aria-label="Per-Component Error Statistics">Per-Component Error Statistics</a></li>
+                <li>
+                    <a href="#interpretation" aria-label="Interpretation">Interpretation</a></li></ul>
+                </li>
+                <li>
+                    <a href="#8-failed-approaches" aria-label="8. Failed Approaches">8. Failed Approaches</a><ul>
+                        
+                <li>
+                    <a href="#81-laplacian-nll-v8" aria-label="8.1 Laplacian NLL (v8)">8.1 Laplacian NLL (v8)</a></li>
+                <li>
+                    <a href="#82-stereocorrelation-module-v9-v11" aria-label="8.2 StereoCorrelation Module (v9-v11)">8.2 StereoCorrelation Module (v9-v11)</a></li>
+                <li>
+                    <a href="#83-raft-stereo-distillation-v23-v25" aria-label="8.3 RAFT-Stereo Distillation (v23-v25)">8.3 RAFT-Stereo Distillation (v23-v25)</a></li>
+                <li>
+                    <a href="#84-combined-changes-v9-v10" aria-label="8.4 Combined Changes (v9, v10)">8.4 Combined Changes (v9, v10)</a></li>
+                <li>
+                    <a href="#85-multi-scale-cost-volume-pyramid-v27-v29" aria-label="8.5 Multi-Scale Cost Volume Pyramid (v27-v29)">8.5 Multi-Scale Cost Volume Pyramid (v27-v29)</a></li>
+                <li>
+                    <a href="#86-depth-residual-offset-v32" aria-label="8.6 Depth Residual Offset (v32)">8.6 Depth Residual Offset (v32)</a></li></ul>
+                </li>
+                <li>
+                    <a href="#9-current-best-configuration" aria-label="9. Current Best Configuration">9. Current Best Configuration</a><ul>
+                        
+                <li>
+                    <a href="#model" aria-label="Model">Model</a></li>
+                <li>
+                    <a href="#training-recipe" aria-label="Training Recipe">Training Recipe</a></li>
+                <li>
+                    <a href="#depth-branch" aria-label="Depth Branch">Depth Branch</a></li>
+                <li>
+                    <a href="#loss-weights" aria-label="Loss Weights">Loss Weights</a></li>
+                <li>
+                    <a href="#best-results" aria-label="Best Results">Best Results</a></li>
+                <li>
+                    <a href="#remaining-headroom" aria-label="Remaining Headroom">Remaining Headroom</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="stereo-3d-detection-experiments-report">Stereo 3D Detection Experiments Report<a hidden class="anchor" aria-hidden="true" href="#stereo-3d-detection-experiments-report">#</a></h1>
+<h2 id="table-of-contents">Table of Contents<a hidden class="anchor" aria-hidden="true" href="#table-of-contents">#</a></h2>
+<ol>
+<li><a href="#1-project-overview">Project Overview</a></li>
+<li><a href="#2-architecture">Architecture</a></li>
+<li><a href="#3-experiment-timeline">Experiment Timeline</a></li>
+<li><a href="#4-results-summary">Results Summary</a></li>
+<li><a href="#5-detailed-experiment-notes">Detailed Experiment Notes</a></li>
+<li><a href="#6-key-findings">Key Findings</a></li>
+<li><a href="#7-error-analysis">Error Analysis</a></li>
+<li><a href="#8-failed-approaches">Failed Approaches</a></li>
+<li><a href="#9-current-best-configuration">Current Best Configuration</a></li>
+</ol>
+<hr>
+<h2 id="1-project-overview">1. Project Overview<a hidden class="anchor" aria-hidden="true" href="#1-project-overview">#</a></h2>
+<p>This project implements stereo 3D object detection on KITTI by extending the Ultralytics YOLO framework. The model takes a 6-channel stereo image (left RGB + right RGB) and predicts 3D bounding boxes with class, dimensions, orientation, and depth.</p>
+<p><strong>Task</strong>: Predict 3D bounding boxes (center, dimensions, orientation) from calibrated stereo image pairs.</p>
+<p><strong>Dataset</strong>: KITTI stereo — 3 classes (Car, Pedestrian, Cyclist), ~3,700 training / ~3,769 validation images.</p>
+<p><strong>Primary metric</strong>: <a href="mailto:AP3D@0.5">AP3D@0.5</a> (3D Average Precision at 0.5 IoU threshold).</p>
+<p><strong>Hardware</strong>: 8x GPU training, batch size 128 (n/s) or 32 (m), image size 384x1248.</p>
+<hr>
+<h2 id="2-architecture">2. Architecture<a hidden class="anchor" aria-hidden="true" href="#2-architecture">#</a></h2>
+<h3 id="21-backbone-siameseweight-shared-v36-current-best">2.1 Backbone: Siamese/Weight-Shared (v36+, current best)<a hidden class="anchor" aria-hidden="true" href="#21-backbone-siameseweight-shared-v36-current-best">#</a></h3>
+<p>The current recommended backbone uses a standard 3-channel YOLO26 backbone that processes left and right images separately via a <strong>batch dimension trick</strong>, with 100% shared weights.</p>
+<pre tabindex="0"><code>Forward pass:
+1. Split 6ch input → left [B,3,H,W], right [B,3,H,W]
+2. Stack as batch: stereo = cat([left, right], dim=0) → [2B, 3, H, W]
+3. Run backbone layers 0..tap_layer on [2B, 3, H, W] (shared weights)
+4. Split at tap: left_feat = out[:B], right_feat = out[B:]
+5. Pass (left_feat, right_feat) tuple to StereoCostVolume
+6. Continue layers tap_layer+1..end with LEFT-ONLY features [B, C, H, W]
+7. Head sees clean left-only P3/P4/P5 + cost_vol — identical interface
+</code></pre><p><strong>Benefits</strong>:</p>
+<ul>
+<li><strong>100% pretrained weight compatible</strong> — standard 3ch YOLO26 backbone, no groups=2 stem modification needed</li>
+<li><strong>Clean left-only features</strong> — 2D detection sees only left image, matching mono YOLO evaluation</li>
+<li><strong>Same cost volume quality</strong> — L/R features computed by identical (shared) weights at stride 4</li>
+</ul>
+<p><strong>Implementation</strong>: <code>_predict_once</code> override in <code>Stereo3DDetModel</code> (model.py). Model built with <code>ch=3</code> when <code>siamese: true</code> in YAML.</p>
+<p><strong>Model config</strong>: <code>yolo26-stereo3ddet-siamese.yaml</code></p>
+<h3 id="22-stereo-cost-volume-v17">2.2 Stereo Cost Volume (v17+)<a hidden class="anchor" aria-hidden="true" href="#22-stereo-cost-volume-v17">#</a></h3>
+<p>The <code>StereoCostVolume</code> module computes sparse dot-product correlation between left and right features at 24 discrete disparity offsets (0 to 48 feature pixels at stride 4):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">StereoCostVolume</span>(nn<span style="color:#f92672">.</span>Module):
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Takes left/right features from backbone tap point (stride 4)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Computes normalized dot-product at each disparity offset</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Refines: num_bins → c2 channels, downsamples stride 4 → stride 8</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Output: [B, 64, H/8, W/8]</span>
+</span></span></code></pre></div><p><code>StereoCostVolume.forward</code> accepts both <code>(left, right)</code> tuple (siamese) and single tensor (groups=2) for backward compatibility.</p>
+<p><strong>Key design decision (v20+)</strong>: The cost volume is routed <strong>only to depth branches</strong> (lr_distance, depth) in the head, NOT merged into P3. This avoids the 2D-3D task conflict where stereo correlation features dilute 2D detection quality.</p>
+<p><strong>Parameter overhead</strong>: ~75K params for s-size model (+0.7%).</p>
+<h3 id="23-detection-head-stereo3ddetheadyolo11">2.3 Detection Head: Stereo3DDetHeadYOLO11<a hidden class="anchor" aria-hidden="true" href="#23-detection-head-stereo3ddetheadyolo11">#</a></h3>
+<p>Multi-scale head (P3/P4/P5) with auxiliary branches for 3D prediction:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Branch</th>
+          <th>Channels</th>
+          <th>Target</th>
+          <th>Encoding</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>lr_distance</code></td>
+          <td>1</td>
+          <td>Stereo disparity</td>
+          <td>Log-space: <code>log(cx_left - cx_right)</code></td>
+      </tr>
+      <tr>
+          <td><code>depth</code></td>
+          <td>16</td>
+          <td>Direct depth</td>
+          <td>DFL bins: <code>linspace(log(2m), log(80m), 16)</code>, decoded via softmax weighted sum</td>
+      </tr>
+      <tr>
+          <td><code>dimensions</code></td>
+          <td>3</td>
+          <td>Object size (H,W,L)</td>
+          <td>Normalized offset: <code>(dim - mean) / std</code></td>
+      </tr>
+      <tr>
+          <td><code>orientation</code></td>
+          <td>2</td>
+          <td>Heading angle</td>
+          <td><code>[sin(alpha), cos(alpha)]</code></td>
+      </tr>
+  </tbody>
+</table>
+<p>Plus standard YOLO Detect outputs: boxes (xyxy), class scores, DFL features.</p>
+<p>The cost volume (when present) is concatenated <strong>only with P3 features for depth branches</strong> (lr_distance, depth). The 2D detection branches (box, cls) and geometric branches (dimensions, orientation) see clean P3/P4/P5 features.</p>
+<h3 id="24-loss-function-stereo3ddetlossyolo11">2.4 Loss Function: Stereo3DDetLossYOLO11<a hidden class="anchor" aria-hidden="true" href="#24-loss-function-stereo3ddetlossyolo11">#</a></h3>
+<p>6-component loss vector: <code>[box, cls, lr_dist, depth, dims, orient]</code></p>
+<ul>
+<li><strong>2D Detection</strong>: Standard YOLO box + cls losses via Task-Aligned Assigner (TAL)</li>
+<li><strong>Auxiliary 3D</strong>: DFLoss for depth bins; smooth L1 for lr_distance, dimensions, orientation — all on TAL-assigned positive locations</li>
+<li><strong>Loss weights</strong> (from YAML): <code>lr_distance=2.0, depth=3.0, dims=1.0, orient=1.0</code></li>
+</ul>
+<h3 id="25-depth-decoding-inference">2.5 Depth Decoding (Inference)<a hidden class="anchor" aria-hidden="true" href="#25-depth-decoding-inference">#</a></h3>
+<p>Dual depth sources fused via geometric mean:</p>
+<pre tabindex="0"><code>z_from_disparity = (fx * baseline) / (exp(lr_log) * input_w / letterbox_scale)
+z_from_direct    = exp(depth_log)
+z_final          = sqrt(z_disp * z_direct)   # geometric mean
+</code></pre><h3 id="26-post-processing-pipeline">2.6 Post-Processing Pipeline<a hidden class="anchor" aria-hidden="true" href="#26-post-processing-pipeline">#</a></h3>
+<ol>
+<li><strong>NMS</strong> on 2D Detect outputs</li>
+<li><strong>Aux map sampling</strong> at kept indices for 3D attributes</li>
+<li><strong>3D decoding</strong>: depth, dimensions, orientation → Box3D</li>
+<li><strong>(Optional) Geometric construction</strong>: Gauss-Newton refinement with 7 constraint equations</li>
+<li><strong>(Optional) Dense alignment</strong>: Photometric patch matching for sub-pixel depth refinement</li>
+</ol>
+<h3 id="27-alternative-group-conv-stem-v35-and-earlier">2.7 Alternative: Group-Conv Stem (v35 and earlier)<a hidden class="anchor" aria-hidden="true" href="#27-alternative-group-conv-stem-v35-and-earlier">#</a></h3>
+<p>An older backbone variant using a <strong>groups=2 group-convolution stem</strong> for the first two layers. This processes left and right image features independently before merging.</p>
+<pre tabindex="0"><code>Layer 0: Conv(6→64, k=3, s=2, groups=2)   # P1/2 — left/right independent
+Layer 1: Conv(64→128, k=3, s=2, groups=2) # P2/4 — left/right independent
+Layer 2: C3k2(128→256)                     # Features merge here
+Layer 3+: Standard YOLO backbone           # P3/8, P4/16, P5/32
+</code></pre><p><strong>Note</strong>: The siamese backbone (Section 2.1) supersedes this approach with better pretrained weight compatibility and comparable or better accuracy.</p>
+<hr>
+<h2 id="3-experiment-timeline">3. Experiment Timeline<a hidden class="anchor" aria-hidden="true" href="#3-experiment-timeline">#</a></h2>
+<h3 id="phase-1-baseline--training-recipe-v3v7">Phase 1: Baseline &amp; Training Recipe (v3–v7)<a hidden class="anchor" aria-hidden="true" href="#phase-1-baseline--training-recipe-v3v7">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Optimizer</th>
+          <th>Epochs</th>
+          <th>Aug</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v3</td>
+          <td>Cosine LR, patience=300</td>
+          <td>AdamW lr=0.005</td>
+          <td>300</td>
+          <td>No</td>
+          <td>n,s,m,l,x</td>
+      </tr>
+      <tr>
+          <td>v4</td>
+          <td>Higher LR (lr0=0.01)</td>
+          <td>AdamW</td>
+          <td>300</td>
+          <td>No</td>
+          <td>n,s,m</td>
+      </tr>
+      <tr>
+          <td>v5</td>
+          <td>Short schedule + cosine (best of v2+v3)</td>
+          <td>AdamW lr=0.005</td>
+          <td>100</td>
+          <td>No</td>
+          <td>n,s,m,l,x</td>
+      </tr>
+      <tr>
+          <td>v6</td>
+          <td>Long schedule (v5 start + v3 tail)</td>
+          <td>AdamW lr=0.005</td>
+          <td>300</td>
+          <td>No</td>
+          <td>n,s,m</td>
+      </tr>
+      <tr>
+          <td>v7</td>
+          <td>2-stage: v5 weights → SGD finetune</td>
+          <td>SGD lr=0.01</td>
+          <td>200</td>
+          <td>No</td>
+          <td>n,s,m,l,x</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-2-loss--module-experiments-v8v11">Phase 2: Loss &amp; Module Experiments (v8–v11)<a hidden class="anchor" aria-hidden="true" href="#phase-2-loss--module-experiments-v8v11">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Result vs v5</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v8</td>
+          <td>Laplacian uncertainty loss (2-ch depth branches)</td>
+          <td>Neutral (n), catastrophic (s)</td>
+      </tr>
+      <tr>
+          <td>v8b</td>
+          <td>Laplacian with balanced weights, tighter clamp</td>
+          <td>Slightly worse</td>
+      </tr>
+      <tr>
+          <td>v9</td>
+          <td>StereoCorrelation + Laplacian + distance-aware loss</td>
+          <td>n +2pp, s -7pp, m -6pp</td>
+      </tr>
+      <tr>
+          <td>v10</td>
+          <td>Corr + smooth_l1 + sigma supervision</td>
+          <td>n -6pp (all changes hurt)</td>
+      </tr>
+      <tr>
+          <td>v11</td>
+          <td>Correlation module ONLY (original loss)</td>
+          <td>Neutral (n -1pp, s -1pp)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-3-augmentation--depth-rebalancing-v12v14">Phase 3: Augmentation &amp; Depth Rebalancing (v12–v14)<a hidden class="anchor" aria-hidden="true" href="#phase-3-augmentation--depth-rebalancing-v12v14">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v12</td>
+          <td>Enable augmentation (fliplr, HSV) + rebalance depth weights (lr_dist 0.2→2.0, depth 0.1→1.0) + 200ep</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v13</td>
+          <td>SGD finetune from v12 checkpoints</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v14</td>
+          <td>SGD from scratch (300ep, no AdamW warmup)</td>
+          <td>n,s</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-4-architecture-comparison-v15v16">Phase 4: Architecture Comparison (v15–v16)<a hidden class="anchor" aria-hidden="true" href="#phase-4-architecture-comparison-v15v16">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v15</td>
+          <td>YOLO26 vs YOLO11 backbone comparison (200ep AdamW)</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v16</td>
+          <td>SGD finetune from v15 weights</td>
+          <td>n,s</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-5-cost-volume-v17v21">Phase 5: Cost Volume (v17–v21)<a hidden class="anchor" aria-hidden="true" href="#phase-5-cost-volume-v17v21">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v17</td>
+          <td>StereoCostVolume (merged into P3), 200ep AdamW</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v18</td>
+          <td>SGD finetune from v17 weights</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v19</td>
+          <td>m-size cost volume (batch=32, lr=0.001)</td>
+          <td>m</td>
+      </tr>
+      <tr>
+          <td>v20</td>
+          <td>Cost volume routed to depth branches ONLY (not merged into P3)</td>
+          <td>n,s,m</td>
+      </tr>
+      <tr>
+          <td>v21</td>
+          <td>SGD finetune ALL cost volume models (merged vs depth-only)</td>
+          <td>n,s,m</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-6-raft-stereo--distillation--all-failed-v22v25">Phase 6: RAFT-Stereo &amp; Distillation — All Failed (v22–v25)<a hidden class="anchor" aria-hidden="true" href="#phase-6-raft-stereo--distillation--all-failed-v22v25">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v22</td>
+          <td>7-channel depth prior (RAFT-Stereo precomputed disparity as input)</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v23</td>
+          <td>Disparity distillation from teacher (weight=1.0)</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v24</td>
+          <td>Disparity distillation (weight=0.05)</td>
+          <td>n,s</td>
+      </tr>
+      <tr>
+          <td>v25</td>
+          <td>Feature distillation (MSE on P3 features from teacher)</td>
+          <td>n,s</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-7-long-training--bug-fixes-v26v30">Phase 7: Long Training &amp; Bug Fixes (v26–v30)<a hidden class="anchor" aria-hidden="true" href="#phase-7-long-training--bug-fixes-v26v30">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>Sizes</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v26</td>
+          <td>1000ep SGD from v21 (extended training)</td>
+          <td>s</td>
+      </tr>
+      <tr>
+          <td>v27</td>
+          <td>Multi-scale cost volume pyramid ablations</td>
+          <td>s</td>
+      </tr>
+      <tr>
+          <td>v28</td>
+          <td>Multi-scale + disparity loss (w=1.0)</td>
+          <td>s</td>
+      </tr>
+      <tr>
+          <td>v29</td>
+          <td>Multi-scale + disparity loss (w=0.05) / no disp</td>
+          <td>s</td>
+      </tr>
+      <tr>
+          <td>v30</td>
+          <td>v26 rerun with fitness function bugfix</td>
+          <td>s</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Critical bug discovered in v30</strong>: The fitness function used to select <code>best.pt</code> was based on <strong>2D mAP50-95</strong>, not <a href="mailto:AP3D@0.5">AP3D@0.5</a>. When <code>get_stats()</code> merged <code>{**3d_metrics, **det_metrics}</code>, the 2D <code>fitness</code> key overwrote the 3D one. This means all experiments prior to v30 saved <code>best.pt</code> based on 2D performance, not 3D. For v26, the true best <a href="mailto:AP3D@0.5">AP3D@0.5</a> was 46.4% at epoch 550, but <code>best.pt</code> only had 25.5% (wrong epoch).</p>
+<p><strong>Fix</strong>: Pop <code>fitness</code> from det_metrics before merge, put 3D metrics last. Also fixed per-threshold GT matching and relaxed depth clamp.</p>
+<p><strong>Multi-scale cost volume (v27-v29) — all failed</strong>:</p>
+<ul>
+<li>v28 (ms + disp w=1.0): s=39.5% — disparity loss dominated 87% of gradient</li>
+<li>v29 (ms + disp w=0.05): s=39.6% — same result even with balanced loss</li>
+<li>v29 (ms + no disp): s=38.9% — architecture itself hurts, not just the loss</li>
+<li>Single-scale baseline: s=46.4% (v26/v30)</li>
+<li><strong>Conclusion</strong>: Fine-grained stride-4 single-scale &gt; coarser multi-scale pyramid. All multi-scale code removed.</li>
+</ul>
+<h3 id="phase-8-depth-output-representation-v31v33">Phase 8: Depth Output Representation (v31–v33)<a hidden class="anchor" aria-hidden="true" href="#phase-8-depth-output-representation-v31v33">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>s-size</th>
+          <th>Status</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v31</td>
+          <td>DFL-style depth bins (16 bins in log-space)</td>
+          <td><strong>53.0%</strong></td>
+          <td>Done</td>
+      </tr>
+      <tr>
+          <td>v32</td>
+          <td>Depth residual (16 bins + 1 regression offset)</td>
+          <td>48.8%</td>
+          <td>Failed, reverted</td>
+      </tr>
+      <tr>
+          <td>v33a</td>
+          <td>Depth loss weight 3.0 (was 1.0)</td>
+          <td><strong>56.5%</strong></td>
+          <td>Done</td>
+      </tr>
+      <tr>
+          <td>v33b</td>
+          <td>32 depth bins (was 16)</td>
+          <td>56.2%</td>
+          <td>Done</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="phase-9-yolo26-backbone-evaluation--siamese-architecture-v34v36">Phase 9: YOLO26 Backbone, Evaluation &amp; Siamese Architecture (v34–v36)<a hidden class="anchor" aria-hidden="true" href="#phase-9-yolo26-backbone-evaluation--siamese-architecture-v34v36">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Changes</th>
+          <th>n</th>
+          <th>s</th>
+          <th>m</th>
+          <th>l</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v34</td>
+          <td>YOLO26 backbone + costvol, all sizes, R40 eval</td>
+          <td>42.4%</td>
+          <td><strong>49.8%</strong></td>
+          <td>49.0%</td>
+          <td>47.5%</td>
+      </tr>
+      <tr>
+          <td>v35</td>
+          <td>v34 + occlusion filter OFF (train on all objects)</td>
+          <td>—</td>
+          <td><strong>48.1%</strong></td>
+          <td>—</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>v36</td>
+          <td>Siamese weight-shared backbone (batch trick)</td>
+          <td>48.1%</td>
+          <td>48.3%</td>
+          <td>49.0%</td>
+          <td><strong>50.9%</strong></td>
+      </tr>
+  </tbody>
+</table>
+<p>All v34–v36 numbers are KITTI R40 Moderate mean <a href="mailto:AP3D@0.5">AP3D@0.5</a>.</p>
+<p><strong>v34</strong>: Switched from YOLO11 to YOLO26 backbone with cost volume. Trained all sizes (n/s/m/l) with SGD 1000ep, same recipe as v30/v31. s-size is sweet spot; m/l overfit on small KITTI dataset. Introduced KITTI-standard R40 evaluation with difficulty splits (Easy/Moderate/Hard).</p>
+<p><strong>v35</strong>: Disabled occlusion filter (<code>filter_occluded=False</code>) — trains on ALL objects including heavily occluded (DontCare). Result: Moderate -1.7pp but Hard <strong>+3.5pp</strong> @0.5. Car <a href="mailto:Hard@0.5">Hard@0.5</a>: 55.7%→67.9% (+12.2pp). Better robustness to difficult cases.</p>
+<p><strong>v36</strong>: Siamese/weight-shared backbone (see §2.7). Standard 3ch YOLO26 backbone processes L/R via batch trick [2B,3,H,W]. 100% pretrained weight compatible. R40 results match v35 across all sizes; l-size (50.9%) is new best. Car-only (nc=1) training failed — depth branch collapses with single-class TAL (see §5 notes).</p>
+<hr>
+<h2 id="4-results-summary">4. Results Summary<a hidden class="anchor" aria-hidden="true" href="#4-results-summary">#</a></h2>
+<h3 id="41-complete-results-table">4.1 Complete Results Table<a hidden class="anchor" aria-hidden="true" href="#41-complete-results-table">#</a></h3>
+<p>All numbers are <strong><a href="mailto:AP3D@0.5">AP3D@0.5</a></strong> (%) — best validation epoch.</p>
+<table>
+  <thead>
+      <tr>
+          <th>Experiment</th>
+          <th>n-size</th>
+          <th>s-size</th>
+          <th>m-size</th>
+          <th>Key Change</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Phase 1: Training Recipe</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v5 (baseline)</td>
+          <td>17.5</td>
+          <td>18.6</td>
+          <td>16.6</td>
+          <td>100ep AdamW, no aug</td>
+      </tr>
+      <tr>
+          <td>v7 (SGD finetune)</td>
+          <td><strong>26.7</strong></td>
+          <td>—</td>
+          <td>—</td>
+          <td>v5 + 200ep SGD</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 2: Loss &amp; Modules</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v8 (Laplacian)</td>
+          <td>17.3</td>
+          <td>7.5</td>
+          <td>—</td>
+          <td>Laplacian NLL → negative losses</td>
+      </tr>
+      <tr>
+          <td>v9 (corr+Laplacian+dist)</td>
+          <td>19.6</td>
+          <td>12.0</td>
+          <td>10.7</td>
+          <td>Too many changes at once</td>
+      </tr>
+      <tr>
+          <td>v10 (corr+fixed loss)</td>
+          <td>11.6</td>
+          <td>12.0</td>
+          <td>—</td>
+          <td>Smooth L1 + sigma, still hurt</td>
+      </tr>
+      <tr>
+          <td>v11 (corr only)</td>
+          <td>16.5</td>
+          <td>17.3</td>
+          <td>—</td>
+          <td>StereoCorrelation is neutral</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 3: Aug + Depth Rebalancing</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v12 (aug+depth weights)</td>
+          <td>18.4</td>
+          <td>19.0</td>
+          <td>—</td>
+          <td>Augmentation + depth 0.1→1.0</td>
+      </tr>
+      <tr>
+          <td>v13 (v12 + SGD)</td>
+          <td>24.7</td>
+          <td><strong>27.4</strong></td>
+          <td>—</td>
+          <td>SGD finetune from v12</td>
+      </tr>
+      <tr>
+          <td>v14 (SGD scratch)</td>
+          <td>22.3</td>
+          <td>26.2</td>
+          <td>—</td>
+          <td>Pure SGD 300ep</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 4: Architecture</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v15 (YOLO26 AdamW)</td>
+          <td>17.9</td>
+          <td>—</td>
+          <td>—</td>
+          <td>YOLO26 backbone</td>
+      </tr>
+      <tr>
+          <td>v16 (YOLO11 SGD)</td>
+          <td>—</td>
+          <td>27.1</td>
+          <td>—</td>
+          <td>SGD from v15 YOLO11</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 5: Cost Volume</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v17 (costvol merged)</td>
+          <td>30.6</td>
+          <td>36.5</td>
+          <td>—</td>
+          <td>StereoCostVolume in P3</td>
+      </tr>
+      <tr>
+          <td>v18 (costvol SGD)</td>
+          <td>31.7</td>
+          <td>35.6</td>
+          <td>—</td>
+          <td>SGD finetune from v17</td>
+      </tr>
+      <tr>
+          <td>v19 (costvol m-size)</td>
+          <td>—</td>
+          <td>—</td>
+          <td>37.7</td>
+          <td>m-size, batch=32, lr=0.001</td>
+      </tr>
+      <tr>
+          <td>v20 (depth-only routing)</td>
+          <td>28.8</td>
+          <td>32.7</td>
+          <td>33.5</td>
+          <td>Cost vol → depth branches only</td>
+      </tr>
+      <tr>
+          <td>v21 merged SGD</td>
+          <td>31.7</td>
+          <td>35.6</td>
+          <td>38.9</td>
+          <td>SGD from v17/v19</td>
+      </tr>
+      <tr>
+          <td>v21 depth-only SGD</td>
+          <td><strong>34.0</strong></td>
+          <td><strong>40.2</strong></td>
+          <td>37.7</td>
+          <td>SGD from v20</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 6: RAFT-Stereo (all failed)</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v22 (depth prior 7ch)</td>
+          <td>34.5</td>
+          <td>39.0</td>
+          <td>—</td>
+          <td>RAFT-Stereo as 7th channel</td>
+      </tr>
+      <tr>
+          <td>v25 (feature distill SGD)</td>
+          <td>31.1</td>
+          <td>33.0</td>
+          <td>—</td>
+          <td>MSE distillation on P3</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 7: Long Training &amp; Bug Fixes</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v26 (1000ep SGD)</td>
+          <td>—</td>
+          <td>46.4†</td>
+          <td>—</td>
+          <td>Extended training (best.pt wrong due to bug)</td>
+      </tr>
+      <tr>
+          <td>v28 (multi-scale + disp)</td>
+          <td>—</td>
+          <td>39.5</td>
+          <td>—</td>
+          <td>Multi-scale pyramid + disparity loss</td>
+      </tr>
+      <tr>
+          <td>v29 (multi-scale no disp)</td>
+          <td>—</td>
+          <td>38.9</td>
+          <td>—</td>
+          <td>Multi-scale pyramid hurts even without disp loss</td>
+      </tr>
+      <tr>
+          <td>v30 (v26 + fitness fix)</td>
+          <td>—</td>
+          <td><strong>46.4</strong></td>
+          <td>—</td>
+          <td>Correct best.pt selection by <a href="mailto:AP3D@0.5">AP3D@0.5</a></td>
+      </tr>
+      <tr>
+          <td><strong>Phase 8: Depth Output Representation</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v31 (DFL depth bins)</td>
+          <td>41.3</td>
+          <td><strong>53.0</strong></td>
+          <td>—</td>
+          <td>16 bins in log-depth, DFLoss</td>
+      </tr>
+      <tr>
+          <td>v32 (depth residual)</td>
+          <td>—</td>
+          <td>48.8</td>
+          <td>—</td>
+          <td>16 bins + 1 residual → regression hurt bins</td>
+      </tr>
+      <tr>
+          <td>v33a (depth weight 3.0)</td>
+          <td>—</td>
+          <td><strong>56.5</strong></td>
+          <td>—</td>
+          <td>Depth loss 1.0 → 3.0</td>
+      </tr>
+      <tr>
+          <td>v33b (32 bins)</td>
+          <td>—</td>
+          <td>56.2</td>
+          <td>—</td>
+          <td>16 → 32 DFL bins (≈same as 16)</td>
+      </tr>
+      <tr>
+          <td><strong>Phase 9: YOLO26 + Siamese</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+      </tr>
+      <tr>
+          <td>v34 (YOLO26 costvol, R40)</td>
+          <td>42.4</td>
+          <td><strong>49.8</strong></td>
+          <td>49.0</td>
+          <td>YOLO26 backbone, R40 eval</td>
+      </tr>
+      <tr>
+          <td>v35 (filter OFF, R40)</td>
+          <td>—</td>
+          <td><strong>48.1</strong></td>
+          <td>—</td>
+          <td>Occlusion filter disabled</td>
+      </tr>
+      <tr>
+          <td>v36 (siamese, R40)</td>
+          <td>48.1</td>
+          <td>48.3</td>
+          <td>49.0</td>
+          <td>Weight-shared 3ch backbone</td>
+      </tr>
+      <tr>
+          <td>v36-l (siamese, R40)</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>l-size: <strong>50.9%</strong> (new best R40)</td>
+      </tr>
+  </tbody>
+</table>
+<p>†v26 best <a href="mailto:AP3D@0.5">AP3D@0.5</a> was 46.4% at ep550, but best.pt saved wrong epoch due to fitness bug.</p>
+<h3 id="42-top-5-results-r40-moderate-mean">4.2 Top 5 Results (R40 Moderate Mean)<a hidden class="anchor" aria-hidden="true" href="#42-top-5-results-r40-moderate-mean">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Rank</th>
+          <th>Experiment</th>
+          <th><a href="mailto:AP3D@0.5">AP3D@0.5</a></th>
+          <th><a href="mailto:AP3D@0.7">AP3D@0.7</a></th>
+          <th>Eval</th>
+          <th>Best Epoch</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td><strong>l_yolo26_siamese_v36</strong></td>
+          <td><strong>50.9%</strong></td>
+          <td><strong>31.6%</strong></td>
+          <td>R40</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>s_yolo26_costvol_v34</td>
+          <td>49.8%</td>
+          <td>30.7%</td>
+          <td>R40</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>3</td>
+          <td>m_yolo26_siamese_v36</td>
+          <td>49.0%</td>
+          <td>29.1%</td>
+          <td>R40</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>4</td>
+          <td>s_yolo26_siamese_v36</td>
+          <td>48.3%</td>
+          <td>29.4%</td>
+          <td>R40</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>5</td>
+          <td>s_yolo26_costvol_v35 (filter OFF)</td>
+          <td>48.1%</td>
+          <td>30.1%</td>
+          <td>R40</td>
+          <td>210</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Note</strong>: R40 and non-R40 metrics are not directly comparable. R40 uses KITTI-standard 40-point interpolation with difficulty splits; non-R40 uses COCO-style 101-point interpolation without difficulty filtering. R40 numbers are generally lower.</p>
+<h3 id="43-progression-chart-s-size-">4.3 Progression Chart (s-size <a href="mailto:AP3D@0.5">AP3D@0.5</a>)<a hidden class="anchor" aria-hidden="true" href="#43-progression-chart-s-size-">#</a></h3>
+<pre tabindex="0"><code>AP3D@0.5 (s-size, non-R40 unless noted)
+
+ 57% ┤                                                                          ■ v33a depth_w=3
+     │                                                                          ■ v33b 32 bins
+ 55% ┤                                                                    ■ v31 depth bins
+     │
+ 50% ┤                                                              ✗ v32 depth residual (reverted)
+     │                                                                               ■ v34 R40*
+     │                                                                               ■ v35 R40*
+ 45% ┤                                                        ■ v30 fitness fix
+     │
+ 40% ┤                                     ■ v21 depth-only SGD
+     │                                  ■ v22 depth prior
+     │                               ✗ v28 multi-scale
+ 35% ┤                           ■ v17 costvol merged
+     │                              ■ v18 SGD
+     │                    ■ v25 feat distill
+ 30% ┤
+     │             ■ v13 SGD finetune
+ 25% ┤                ■ v14 SGD scratch
+     │
+ 20% ┤  ■ v5 baseline
+     │  ■ v12 aug+depth
+ 15% ┤
+     │      ■ v9 correlation
+ 10% ┤      ■ v10 fixed loss
+     │   ■ v8 Laplacian
+     ┼──────────────────────────────────────────────────────────────────────────────
+       v5  v8-11 v12-14 v17-21 v22-25 v26-30 v31-33          v34-v36
+                                                         *R40 not comparable
+</code></pre><hr>
+<h2 id="5-detailed-experiment-notes">5. Detailed Experiment Notes<a hidden class="anchor" aria-hidden="true" href="#5-detailed-experiment-notes">#</a></h2>
+<h3 id="v5--baseline-100ep-adamw-no-augmentation">v5 — Baseline (100ep AdamW, No Augmentation)<a hidden class="anchor" aria-hidden="true" href="#v5--baseline-100ep-adamw-no-augmentation">#</a></h3>
+<p><strong>Goal</strong>: Establish baseline with short, efficient schedule.</p>
+<p><strong>Config</strong>: AdamW lr=0.005, cosine decay to lr*0.01, 100 epochs, no augmentation, groups=2 stem.</p>
+<p><strong>Results</strong>: n=17.5%, s=18.6%, m=16.6%</p>
+<p><strong>Notes</strong>: Fast convergence. Serves as control for all subsequent experiments. Model sizes beyond s don&rsquo;t help much — suggests the bottleneck is not model capacity but depth estimation quality.</p>
+<hr>
+<h3 id="v7--sgd-finetune-200ep-sgd-from-v5">v7 — SGD Finetune (200ep SGD from v5)<a hidden class="anchor" aria-hidden="true" href="#v7--sgd-finetune-200ep-sgd-from-v5">#</a></h3>
+<p><strong>Goal</strong>: Test 2-stage training (AdamW warmup → SGD refinement).</p>
+<p><strong>Config</strong>: Load v5 best weights → SGD lr=0.01, cosine, 200 epochs.</p>
+<p><strong>Results</strong>: n=26.7% (+9.2pp over v5)</p>
+<p><strong>Key insight</strong>: SGD finetuning is consistently the single most impactful training recipe change. The AdamW stage provides fast initial convergence; SGD refines with better generalization.</p>
+<hr>
+<h3 id="v8--laplacian-uncertainty-loss">v8 — Laplacian Uncertainty Loss<a hidden class="anchor" aria-hidden="true" href="#v8--laplacian-uncertainty-loss">#</a></h3>
+<p><strong>Goal</strong>: Let the network learn per-sample uncertainty to down-weight hard/ambiguous depth predictions.</p>
+<p><strong>Changes</strong>:</p>
+<ul>
+<li>Doubled channels for lr_distance (1→2) and depth (1→2) — extra channel predicts log_sigma</li>
+<li>Replaced smooth_l1 with Laplacian NLL: <code>loss = |target - pred| * exp(-log_sigma) + log_sigma</code></li>
+</ul>
+<p><strong>Results</strong>: n=17.3% (neutral), s=7.5% (catastrophic)</p>
+<p><strong>Failure analysis</strong>: The Laplacian NLL loss went negative from epoch 4 onwards. The network learned to predict very large log_sigma values, effectively setting loss to 0 and stopping learning for depth branches. The log_sigma clamp range was too wide.</p>
+<p><strong>v8b</strong> attempted tighter clamping [-2, 2] and reduced weights but still underperformed baseline.</p>
+<p><strong>Lesson</strong>: Laplacian NLL is unstable for this task. The smooth_l1 loss is more robust.</p>
+<hr>
+<h3 id="v9--stereocorrelation--uncertainty-fusion--distance-aware-loss">v9 — StereoCorrelation + Uncertainty Fusion + Distance-Aware Loss<a hidden class="anchor" aria-hidden="true" href="#v9--stereocorrelation--uncertainty-fusion--distance-aware-loss">#</a></h3>
+<p><strong>Goal</strong>: Address depth bottleneck with explicit stereo correlation module.</p>
+<p><strong>Changes</strong> (3 simultaneous):</p>
+<ol>
+<li><code>StereoCorrelation</code> module: group-wise correlation at 24 disparity levels after stem</li>
+<li>Uncertainty-weighted depth fusion (precision-weighted average) in decode</li>
+<li>Laplacian NLL + distance-aware weighting (closer objects weighted higher)</li>
+</ol>
+<p><strong>Results</strong>: n=19.6% (+2.1pp), s=12.0% (-6.6pp), m=10.7% (-5.9pp)</p>
+<p><strong>Failure analysis</strong>: Combined too many changes. The Laplacian NLL was broken (same issue as v8). Nano model improved because the simpler architecture is more robust to loss instabilities, but larger models diverged.</p>
+<p><strong>Lesson</strong>: Never combine multiple experimental changes. Isolate each variable.</p>
+<hr>
+<h3 id="v10--correlation--fixed-loss">v10 — Correlation + Fixed Loss<a hidden class="anchor" aria-hidden="true" href="#v10--correlation--fixed-loss">#</a></h3>
+<p><strong>Goal</strong>: Isolate correlation benefit with stable loss function.</p>
+<p><strong>Changes</strong>: Same architecture as v9 but replaced Laplacian NLL with smooth_l1 + sigma supervision for decode-time uncertainty fusion.</p>
+<p><strong>Results</strong>: n=11.6% (-5.9pp vs v5)</p>
+<p><strong>Failure analysis</strong>: The sigma supervision and distance-aware weighting still interfered with training. Even with a stable base loss, the additional supervision signals created optimization conflicts.</p>
+<hr>
+<h3 id="v11--correlation-only-original-loss">v11 — Correlation Only (Original Loss)<a hidden class="anchor" aria-hidden="true" href="#v11--correlation-only-original-loss">#</a></h3>
+<p><strong>Goal</strong>: Isolate the pure <code>StereoCorrelation</code> module effect with zero other changes.</p>
+<p><strong>Changes</strong>: Only added StereoCorrelation after group-conv stem. Original smooth_l1 loss, geometric mean decode.</p>
+<p><strong>Results</strong>: n=16.5% (-1.0pp), s=17.3% (-1.3pp)</p>
+<p><strong>Conclusion</strong>: The <code>StereoCorrelation</code> module (inserted into the main feature pathway) is <strong>neutral at best</strong>. It doesn&rsquo;t help because the backbone already learns implicit stereo matching through the group-conv stem. This inline correlation approach was abandoned in favor of the cost volume approach (v17+).</p>
+<hr>
+<h3 id="v12--augmentation--depth-loss-rebalancing">v12 — Augmentation + Depth Loss Rebalancing<a hidden class="anchor" aria-hidden="true" href="#v12--augmentation--depth-loss-rebalancing">#</a></h3>
+<p><strong>Goal</strong>: Apply three config-only improvements simultaneously.</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>Enable stereo augmentation: <code>fliplr=0.5, hsv_h=0.015, hsv_s=0.4, hsv_v=0.3</code></li>
+<li>Rebalance depth loss weights: <code>lr_distance: 0.2→2.0, depth: 0.1→1.0</code></li>
+<li>Longer training: 100→200 epochs</li>
+</ol>
+<p><strong>Results</strong>: n=18.4% (+0.9pp), s=19.0% (+0.4pp)</p>
+<p><strong>Notes</strong>: Modest improvement alone, but these changes provide a better foundation for SGD finetuning (v13). The depth weight rebalancing was important — previously depth loss was 75x smaller than box loss (0.1 vs 7.5), meaning the network barely optimized for depth.</p>
+<hr>
+<h3 id="v13--sgd-finetune-from-v12">v13 — SGD Finetune from v12<a hidden class="anchor" aria-hidden="true" href="#v13--sgd-finetune-from-v12">#</a></h3>
+<p><strong>Goal</strong>: Apply proven SGD recipe to augmented + rebalanced weights.</p>
+<p><strong>Config</strong>: Load v12 best → SGD lr=0.01, cosine, 200 epochs, same augmentation.</p>
+<p><strong>Results</strong>: n=24.7% (+6.3pp over v12), s=27.4% (+8.4pp over v12)</p>
+<p><strong>Key insight</strong>: The s-size model finally overtakes n-size when combining augmentation + depth rebalancing + SGD finetune. This becomes the best non-cost-volume result.</p>
+<hr>
+<h3 id="v14--sgd-from-scratch">v14 — SGD from Scratch<a hidden class="anchor" aria-hidden="true" href="#v14--sgd-from-scratch">#</a></h3>
+<p><strong>Goal</strong>: Test whether pure SGD matches 2-stage (AdamW → SGD) training.</p>
+<p><strong>Config</strong>: SGD lr=0.01, cosine, 300 epochs from scratch (matching total epoch budget of v12+v13).</p>
+<p><strong>Results</strong>: n=22.3%, s=26.2%</p>
+<p><strong>Conclusion</strong>: Pure SGD is ~2pp worse than 2-stage training. The AdamW warmup provides a better starting point for SGD refinement. Two-stage training is the preferred recipe.</p>
+<hr>
+<h3 id="v15--yolo26-vs-yolo11">v15 — YOLO26 vs YOLO11<a hidden class="anchor" aria-hidden="true" href="#v15--yolo26-vs-yolo11">#</a></h3>
+<p><strong>Goal</strong>: Compare YOLO26 (newer) vs YOLO11 backbone architectures.</p>
+<p><strong>Changes</strong>: YOLO26 uses shortcut=True in neck C3k2, enhanced SPPF, C2PSA. Same head class.</p>
+<p><strong>Results</strong>: YOLO26 n=17.9% vs YOLO11 n=16.7% (200ep AdamW)</p>
+<p><strong>Conclusion</strong>: YOLO26 provides marginal improvement (~1pp) in the AdamW stage. Not enough to justify the architecture change.</p>
+<hr>
+<h3 id="v16--sgd-finetune-from-v15">v16 — SGD Finetune from v15<a hidden class="anchor" aria-hidden="true" href="#v16--sgd-finetune-from-v15">#</a></h3>
+<p><strong>Results</strong>: YOLO11 s=27.1% after SGD finetune</p>
+<p><strong>Conclusion</strong>: After SGD finetuning, YOLO11 and YOLO26 converge to similar performance. Architecture is not the bottleneck.</p>
+<hr>
+<h3 id="v17--stereocostvolume-merged-into-p3">v17 — StereoCostVolume (Merged into P3)<a hidden class="anchor" aria-hidden="true" href="#v17--stereocostvolume-merged-into-p3">#</a></h3>
+<p><strong>Goal</strong>: Provide explicit stereo disparity information to the detection head via a learned cost volume.</p>
+<p><strong>Architecture</strong>: <code>StereoCostVolume</code> takes groups=2 features from backbone layer 1 (stride 4), computes dot-product correlation at 24 disparity offsets (0-48 feature pixels), refines to 64 channels, and downsamples to stride 8. Output is concatenated with P3 in the PAN neck.</p>
+<p><strong>Config</strong>: 200ep AdamW, same augmentation as v12+.</p>
+<p><strong>Results</strong>: n=30.6% (+12.2pp over v12), s=36.5% (+17.5pp over v12)</p>
+<p><strong>This was the single biggest improvement in the entire experiment series.</strong> The cost volume provides the network with explicit stereo matching cues that the backbone cannot learn efficiently on its own. Unlike the v9-v11 <code>StereoCorrelation</code> (which was inserted inline and diluted backbone features), the cost volume is a separate pathway that enriches the head with pure disparity information.</p>
+<hr>
+<h3 id="v18--cost-volume-sgd-finetune">v18 — Cost Volume SGD Finetune<a hidden class="anchor" aria-hidden="true" href="#v18--cost-volume-sgd-finetune">#</a></h3>
+<p><strong>Results</strong>: n=31.7% (+1.1pp over v17), s=35.6% (-0.9pp)</p>
+<p><strong>Notes</strong>: SGD provided modest gains for n-size but slightly hurt s-size. The cost volume model may already be well-optimized by AdamW for 200 epochs.</p>
+<hr>
+<h3 id="v19--m-size-cost-volume">v19 — m-Size Cost Volume<a hidden class="anchor" aria-hidden="true" href="#v19--m-size-cost-volume">#</a></h3>
+<p><strong>Config</strong>: m-size model, batch=32 (memory limited), lr=0.001 (lower for larger model).</p>
+<p><strong>Results</strong>: m=37.7%</p>
+<p><strong>Notes</strong>: Medium model provides +1.2pp over s-size v17, but requires 4x smaller batch size and longer training.</p>
+<hr>
+<h3 id="v20--depth-only-cost-volume-routing">v20 — Depth-Only Cost Volume Routing<a hidden class="anchor" aria-hidden="true" href="#v20--depth-only-cost-volume-routing">#</a></h3>
+<p><strong>Goal</strong>: Solve the 2D-3D task conflict. v19&rsquo;s m-size model had AP3D=37.7% but mAP50(2D)=63.7%. The cost volume features diluted P3, hurting 2D box detection.</p>
+<p><strong>Architecture change</strong>: Cost volume output is passed as a <strong>4th input</strong> to the head (alongside P3, P4, P5). The head concatenates it only with P3 features for the depth branches (lr_distance, depth). The 2D detection branches and geometry branches see clean P3/P4/P5.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># Head receives [P3, P4, P5, cost_vol]</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># cost_vol concatenated ONLY with P3 for lr_distance and depth branches</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># box, cls, dimensions, orientation see clean P3/P4/P5</span>
+</span></span></code></pre></div><p><strong>Results</strong>: n=28.8%, s=32.7%, m=33.5%</p>
+<p><strong>Notes</strong>: Initial AP3D is slightly lower than merged (v17), but mAP50(2D) recovers significantly. The hypothesis was that SGD finetuning (v21) would close the AP3D gap while maintaining better 2D detection.</p>
+<hr>
+<h3 id="v21--sgd-finetune-merged-vs-depth-only">v21 — SGD Finetune: Merged vs Depth-Only<a hidden class="anchor" aria-hidden="true" href="#v21--sgd-finetune-merged-vs-depth-only">#</a></h3>
+<p><strong>Goal</strong>: Fair comparison of merged vs depth-only cost volume after SGD finetuning.</p>
+<p><strong>Results</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Size</th>
+          <th>Merged (v21)</th>
+          <th>Depth-Only (v21)</th>
+          <th>Winner</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>n</td>
+          <td>31.7%</td>
+          <td><strong>34.0%</strong></td>
+          <td>Depth-only +2.3pp</td>
+      </tr>
+      <tr>
+          <td>s</td>
+          <td>35.6%</td>
+          <td><strong>40.2%</strong></td>
+          <td>Depth-only +4.6pp</td>
+      </tr>
+      <tr>
+          <td>m</td>
+          <td><strong>38.9%</strong></td>
+          <td>37.7%</td>
+          <td>Merged +1.2pp</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Conclusion</strong>: Depth-only routing wins convincingly at n/s sizes. The clean P3 features give the 2D detector better anchoring, which cascades to better 3D predictions because depth branches use higher-quality TAL assignments. The s-size depth-only model at <strong>40.2% <a href="mailto:AP3D@0.5">AP3D@0.5</a></strong> is the overall best result.</p>
+<p>For m-size, merged still wins — possibly because the larger model has enough capacity to handle the mixed features.</p>
+<hr>
+<h3 id="v22--depth-prior-7-channel-raft-stereo-input">v22 — Depth Prior (7-Channel RAFT-Stereo Input)<a hidden class="anchor" aria-hidden="true" href="#v22--depth-prior-7-channel-raft-stereo-input">#</a></h3>
+<p><strong>Goal</strong>: Provide precomputed high-quality disparity from RAFT-Stereo as a 7th input channel.</p>
+<p><strong>Architecture</strong>: Standard 6-channel model with groups=1 first layer (no group-conv stem since the 7th channel is already a depth signal). RAFT-Stereo disparity maps precomputed offline, scaled to [0,255] uint8.</p>
+<p><strong>Results</strong>: n=34.5%, s=39.0%</p>
+<p><strong>Conclusion</strong>: Competitive with cost volume (s: 39.0% vs 40.2%) but requires offline RAFT-Stereo inference (~3s/frame). Since the learned cost volume matches or exceeds this without the external dependency, the depth prior approach was abandoned.</p>
+<hr>
+<h3 id="v23v25--knowledge-distillation-all-failed">v23–v25 — Knowledge Distillation (All Failed)<a hidden class="anchor" aria-hidden="true" href="#v23v25--knowledge-distillation-all-failed">#</a></h3>
+<p><strong>Goal</strong>: Transfer depth knowledge from a teacher model (trained with RAFT-Stereo depth prior) to a student model (6-channel only).</p>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Method</th>
+          <th>n-size</th>
+          <th>s-size</th>
+          <th>vs v21 baseline</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>v23</td>
+          <td>Disparity distillation (weight=1.0)</td>
+          <td>28.1%</td>
+          <td>33.9%</td>
+          <td>-6pp / -6pp</td>
+      </tr>
+      <tr>
+          <td>v24</td>
+          <td>Disparity distillation (weight=0.05)</td>
+          <td>28.5%</td>
+          <td>33.4%</td>
+          <td>-6pp / -7pp</td>
+      </tr>
+      <tr>
+          <td>v25</td>
+          <td>Feature distillation (MSE on P3)</td>
+          <td>31.1%</td>
+          <td>33.0%</td>
+          <td>-3pp / -7pp</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Failure analysis</strong>: All distillation approaches significantly hurt performance. The teacher&rsquo;s depth prior features are fundamentally different from the student&rsquo;s learned stereo features. Forcing the student to mimic the teacher&rsquo;s representations interferes with its own stereo matching learning. The distillation loss competes with the primary 3D losses rather than complementing them.</p>
+<p><strong>All RAFT-Stereo code (depth prior, distillation) was removed from the codebase</strong> after these experiments confirmed no benefit.</p>
+<hr>
+<h3 id="v26--1000-epoch-sgd-training">v26 — 1000-Epoch SGD Training<a hidden class="anchor" aria-hidden="true" href="#v26--1000-epoch-sgd-training">#</a></h3>
+<p><strong>Goal</strong>: Test whether much longer training improves the cost volume model.</p>
+<p><strong>Config</strong>: s-size, SGD lr=0.01, cosine to 0.01, 1000 epochs from v21 checkpoint, same augmentation.</p>
+<p><strong>Results</strong>: s=46.4% <a href="mailto:AP3D@0.5">AP3D@0.5</a> at epoch 550</p>
+<p><strong>Notes</strong>: A significant +6.2pp improvement over v21 (40.2%), confirming that the model was still underfitting at 200ep SGD. However, a critical bug meant <code>best.pt</code> was saved at the wrong epoch (see v30). The true peak was identified by manual analysis of validation logs.</p>
+<hr>
+<h3 id="v27v29--multi-scale-cost-volume-pyramid-all-failed">v27–v29 — Multi-Scale Cost Volume Pyramid (All Failed)<a hidden class="anchor" aria-hidden="true" href="#v27v29--multi-scale-cost-volume-pyramid-all-failed">#</a></h3>
+<p><strong>Goal</strong>: Provide multi-resolution stereo cues with cost volumes at multiple strides (1/4, 1/8, 1/16).</p>
+<p><strong>Architecture</strong>: Three cost volumes at increasing strides, each providing disparity features at different spatial resolutions. Hypothesis: coarse cost volumes capture large disparities (nearby objects), fine cost volumes capture small disparities (distant objects).</p>
+<p><strong>Results</strong>:</p>
+<ul>
+<li>v28 (ms + disp w=1.0): s=39.5% — disparity loss consumed 87% of total gradient</li>
+<li>v29 (ms + disp w=0.05): s=39.6% — balanced loss didn&rsquo;t help</li>
+<li>v29 (ms + no disp loss): s=38.9% — architecture itself hurts</li>
+</ul>
+<p><strong>Why it failed</strong>: The multi-scale pyramid introduced redundant, coarser-resolution features that diluted the fine-grained stride-4 cost volume signal. The single-scale approach preserves the highest spatial resolution where sub-pixel disparity estimation is most precise. Additionally, the added parameters and computation didn&rsquo;t translate to better gradient signal — the network had more capacity but worse information quality.</p>
+<p><strong>Conclusion</strong>: Single-scale stride-4 cost volume is optimal. All multi-scale code was removed from the codebase.</p>
+<hr>
+<h3 id="v30--fitness-function-bugfix">v30 — Fitness Function Bugfix<a hidden class="anchor" aria-hidden="true" href="#v30--fitness-function-bugfix">#</a></h3>
+<p><strong>Goal</strong>: Re-run v26 setup with corrected model selection.</p>
+<p><strong>Bug</strong>: <code>val.py:get_stats()</code> merged 3D and 2D metrics dicts with <code>{**3d_metrics, **det_metrics}</code>. Both contained a <code>fitness</code> key. Because det_metrics came second, the 2D <code>fitness</code> (based on mAP50-95) <strong>silently overwrote</strong> the 3D <code>fitness</code> (based on <a href="mailto:AP3D@0.5">AP3D@0.5</a>). Result: <code>best.pt</code> was saved when 2D detection peaked, not when 3D detection peaked.</p>
+<p><strong>Impact</strong>: v26&rsquo;s saved <code>best.pt</code> had <a href="mailto:AP3D@0.5">AP3D@0.5</a> of only 25.5%, despite the model reaching 46.4% at epoch 550.</p>
+<p><strong>Fix</strong>: Pop <code>fitness</code> from det_metrics before merge; place 3D metrics last to ensure 3D fitness takes priority. Also fixed per-threshold GT matching and relaxed depth clamp from 1m to ~0m.</p>
+<p><strong>Results</strong>: s=46.4% — matches v26&rsquo;s true peak, confirming the fix works correctly.</p>
+<hr>
+<h3 id="v31--dfl-style-depth-bin-classification">v31 — DFL-Style Depth Bin Classification<a hidden class="anchor" aria-hidden="true" href="#v31--dfl-style-depth-bin-classification">#</a></h3>
+<p><strong>Goal</strong>: Replace scalar depth regression with classification over depth bins, using Distribution Focal Loss (DFL).</p>
+<p><strong>Motivation</strong>: DFL is proven in YOLO&rsquo;s bbox regression (reg_max=16). The same principle — learn a discrete distribution over bin values, then decode via weighted sum — should apply to depth prediction. Classification avoids the gradient magnitude issues of regression on log-depth scalars.</p>
+<p><strong>Architecture changes</strong>:</p>
+<ul>
+<li>Depth branch outputs 16 channels (was 1) representing bin logits</li>
+<li>Bins span log-depth range: <code>linspace(log(2m), log(80m), 16)</code> — bin width ≈ 0.245 in log-space</li>
+<li><code>DepthDFL</code> module decodes: <code>softmax(logits) → weighted sum by bin_values → log-depth</code></li>
+<li>Loss: <code>DFLoss</code> (from YOLO&rsquo;s existing implementation) replaces smooth_l1 for depth</li>
+<li>Training exposes both raw bin logits (for DFLoss) and decoded log-depth (for downstream)</li>
+<li>Inference outputs only decoded log-depth — downstream pipeline unchanged</li>
+</ul>
+<p><strong>Results</strong>: s=53.0% (+6.6pp over v30), n=41.3% — <strong>biggest single-change improvement since the cost volume (v17)</strong></p>
+<p><strong>Why it works</strong>:</p>
+<ol>
+<li>DFLoss (cross-entropy with soft binning) provides more stable gradients than smooth_l1 on unbounded log-depth values</li>
+<li>The softmax output naturally represents prediction confidence — ambiguous depths spread probability across bins rather than committing to a wrong scalar</li>
+<li>16 bins over log(2)–log(80) match the depth distribution of KITTI objects well</li>
+<li>Only the final conv per scale changes (1→16 channels) — ~0% parameter overhead since most depth branch params are in the 3-layer hidden layers</li>
+</ol>
+<p><strong>Training dynamics</strong>: s peaked at epoch 700, n peaked at epoch 360 (both with 1000ep budget, patience=200).</p>
+<hr>
+<h3 id="v32--depth-residual-offset-failed">v32 — Depth Residual Offset (Failed)<a hidden class="anchor" aria-hidden="true" href="#v32--depth-residual-offset-failed">#</a></h3>
+<p><strong>Goal</strong>: Add sub-bin precision by learning a continuous residual offset on top of the coarse bin-decoded depth.</p>
+<p><strong>Motivation</strong>: With 16 bins over log(2)–log(80), bin width is ~0.245 in log-space. At 20m depth, this corresponds to ~±2.5m quantization error. A learned residual could recover this lost precision without disrupting the DFL training signal.</p>
+<p><strong>Architecture changes</strong>:</p>
+<ul>
+<li>Depth branch outputs 17 channels (16 bins + 1 residual)</li>
+<li><code>DepthDFL</code> splits input: bins[:16] for softmax decode, residual[16:] added to coarse depth</li>
+<li>Loss: <code>DFLoss(bins) + smooth_l1(residual, gt_depth - coarse_depth.detach())</code></li>
+<li>Single &ldquo;depth&rdquo; loss slot maintained — 6-item loss vector unchanged</li>
+</ul>
+<p><strong>Results</strong>: s=48.8% (<strong>-4.2pp regression</strong>), best at epoch 290, early stopped at epoch 490</p>
+<p><strong>Why it failed</strong>: The residual channel interferes with the bin classification training signal, even though the residual target is detached from the bin gradients. Possible mechanisms:</p>
+<ol>
+<li>The shared hidden layers (3×Conv) must now serve two objectives (classification bins + regression residual) through the same features, creating an optimization conflict</li>
+<li>The smooth_l1 residual loss provides gradients that compete with DFLoss gradients in the shared layers</li>
+<li>The residual initializes randomly near zero, which is correct, but the initial noise may destabilize early bin learning when training from a pretrained checkpoint</li>
+</ol>
+<p><strong>Decision</strong>: Reverted. The 16-bin DFL approach (v31) remains optimal.</p>
+<hr>
+<h3 id="v33a--depth-loss-weight-30">v33a — Depth Loss Weight 3.0<a hidden class="anchor" aria-hidden="true" href="#v33a--depth-loss-weight-30">#</a></h3>
+<p><strong>Goal</strong>: Give depth more gradient by increasing its loss weight from 1.0 to 3.0.</p>
+<p><strong>Motivation</strong>: The box loss weight is 7.5, cls is 0.5. Depth at 1.0 may be under-represented in the total gradient, causing the shared backbone to prioritize 2D detection features over depth features. Tripling the depth weight should shift the balance.</p>
+<p><strong>Config</strong>: Same as v31 except <code>depth: 3.0</code> in YAML loss_weights. s-size, SGD 1000ep, GPUs 0-3.</p>
+<p><strong>Results</strong>: s=56.5% <a href="mailto:AP3D@0.5">AP3D@0.5</a>, 38.0% <a href="mailto:AP3D@0.7">AP3D@0.7</a> — <strong>+3.5pp over v31</strong>, new best (non-R40)</p>
+<p><strong>R40 results</strong> (KITTI-standard, Moderate mean): <a href="mailto:AP3D@0.5">AP3D@0.5</a>=47.3%, <a href="mailto:AP3D@0.7">AP3D@0.7</a>=28.1%</p>
+<p>Best at epoch 240, early stopped at epoch 440. Simple loss weight tuning outperformed all architecture changes (residual, 32 bins).</p>
+<hr>
+<h3 id="v33b--32-depth-bins">v33b — 32 Depth Bins<a hidden class="anchor" aria-hidden="true" href="#v33b--32-depth-bins">#</a></h3>
+<p><strong>Goal</strong>: Halve the bin width by doubling from 16 to 32 bins.</p>
+<p><strong>Motivation</strong>: v32&rsquo;s residual approach to sub-bin precision failed, but finer bins via pure DFL is the clean alternative. 32 bins over log(2)–log(80) gives bin width ≈ 0.122 in log-space (half of 16-bin). At 20m, quantization error drops from ~±2.5m to ~±1.2m.</p>
+<p><strong>Config</strong>: <code>DEPTH_BINS=32</code> in head_yolo11.py. s-size, SGD 1000ep from v31 best.pt, GPUs 4-7.</p>
+<p><strong>Results</strong>: s=56.2% <a href="mailto:AP3D@0.5">AP3D@0.5</a>, 35.9% <a href="mailto:AP3D@0.7">AP3D@0.7</a> — +3.2pp over v31, but slightly worse than v33a</p>
+<p>Best at epoch 220, early stopped at epoch 420. More bins ≈ same <a href="mailto:AP3D@0.5">AP3D@0.5</a> but weaker <a href="mailto:AP3D@0.7">AP3D@0.7</a>. Not worth the complexity — 16 bins remain optimal.</p>
+<hr>
+<h3 id="v34--yolo26-backbone--r40-evaluation">v34 — YOLO26 Backbone + R40 Evaluation<a hidden class="anchor" aria-hidden="true" href="#v34--yolo26-backbone--r40-evaluation">#</a></h3>
+<p><strong>Goal</strong>: Evaluate YOLO26 backbone across all model sizes with KITTI-standard R40 evaluation.</p>
+<p><strong>Changes</strong>:</p>
+<ol>
+<li>Switched from YOLO11 to YOLO26 backbone (same cost volume architecture)</li>
+<li>Implemented KITTI R40 AP evaluation: 40-point max-precision-at-recall-threshold with difficulty splits (Easy/Moderate/Hard)</li>
+<li>Trained all sizes (n/s/m/l) with SGD 1000ep, filter_occluded=True</li>
+</ol>
+<p><strong>Results (R40 Moderate Mean AP3D)</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Size</th>
+          <th>Params</th>
+          <th><a href="mailto:AP3D@0.5">AP3D@0.5</a></th>
+          <th><a href="mailto:AP3D@0.7">AP3D@0.7</a></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>n</td>
+          <td>3.6M</td>
+          <td>42.4%</td>
+          <td>24.8%</td>
+      </tr>
+      <tr>
+          <td><strong>s</strong></td>
+          <td><strong>11.6M</strong></td>
+          <td><strong>49.8%</strong></td>
+          <td><strong>30.7%</strong></td>
+      </tr>
+      <tr>
+          <td>m</td>
+          <td>26.7M</td>
+          <td>49.0%</td>
+          <td>31.2%</td>
+      </tr>
+      <tr>
+          <td>l</td>
+          <td>31.1M</td>
+          <td>47.5%</td>
+          <td>30.2%</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Conclusion</strong>: s-size is the sweet spot. m/l overfit on KITTI&rsquo;s small training set (~3,700 images). The diminishing returns beyond s confirm that the bottleneck is data, not model capacity.</p>
+<hr>
+<h3 id="v35--occlusion-filter-disabled">v35 — Occlusion Filter Disabled<a hidden class="anchor" aria-hidden="true" href="#v35--occlusion-filter-disabled">#</a></h3>
+<p><strong>Goal</strong>: Train on ALL objects including heavily occluded (KITTI occlusion levels 0-2 + DontCare), letting the KITTI difficulty system handle evaluation filtering.</p>
+<p><strong>Motivation</strong>: With <code>filter_occluded=True</code>, ~25% of training labels were discarded (occluded objects). The KITTI R40 difficulty system already accounts for occlusion (Easy: occ==0, Moderate: occ&lt;=1, Hard: occ&lt;=2). Training on all objects should improve Hard difficulty without hurting Easy.</p>
+<p><strong>Config</strong>: YOLO26-s, SGD 1000ep, <code>filter_occluded=False</code>. Otherwise same as v34.</p>
+<p><strong>Results (R40, per-class and difficulty)</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Class</th>
+          <th><a href="mailto:Easy@0.5">Easy@0.5</a></th>
+          <th><a href="mailto:Mod@0.5">Mod@0.5</a></th>
+          <th><a href="mailto:Hard@0.5">Hard@0.5</a></th>
+          <th><a href="mailto:Easy@0.7">Easy@0.7</a></th>
+          <th><a href="mailto:Mod@0.7">Mod@0.7</a></th>
+          <th><a href="mailto:Hard@0.7">Hard@0.7</a></th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Car</td>
+          <td>72.8%</td>
+          <td>71.8%</td>
+          <td><strong>67.9%</strong></td>
+          <td>36.8%</td>
+          <td>41.2%</td>
+          <td><strong>39.6%</strong></td>
+      </tr>
+      <tr>
+          <td>Ped</td>
+          <td>49.4%</td>
+          <td>42.4%</td>
+          <td><strong>38.5%</strong></td>
+          <td>31.2%</td>
+          <td>27.0%</td>
+          <td><strong>24.4%</strong></td>
+      </tr>
+      <tr>
+          <td>Cyc</td>
+          <td>27.1%</td>
+          <td>30.1%</td>
+          <td><strong>28.4%</strong></td>
+          <td>17.5%</td>
+          <td>22.1%</td>
+          <td><strong>20.8%</strong></td>
+      </tr>
+  </tbody>
+</table>
+<p>Mean Moderate: <a href="mailto:AP3D@0.5">AP3D@0.5</a>=48.1%, <a href="mailto:AP3D@0.7">AP3D@0.7</a>=30.1%
+Mean Hard: <a href="mailto:AP3D@0.5">AP3D@0.5</a>=44.9%, <a href="mailto:AP3D@0.7">AP3D@0.7</a>=28.3%</p>
+<p><strong>vs v34 (filter ON)</strong>: Moderate -1.7pp @0.5, but Hard <strong>+3.5pp @0.5, +3.0pp @0.7</strong>. Car <a href="mailto:Hard@0.5">Hard@0.5</a>: 55.7%→67.9% (+12.2pp). Much better robustness to occluded/truncated objects.</p>
+<p>Best at epoch 210, early stopped at epoch 410.</p>
+<hr>
+<h3 id="v36--siamese-weight-shared-backbone">v36 — Siamese Weight-Shared Backbone<a hidden class="anchor" aria-hidden="true" href="#v36--siamese-weight-shared-backbone">#</a></h3>
+<p><strong>Goal</strong>: Replace groups=2 stem with a siamese/weight-shared backbone for 100% pretrained weight compatibility and clean left-only 2D features.</p>
+<p><strong>Architecture</strong> (see §2.7): Standard 3ch YOLO26 backbone processes L/R images via batch trick [2B,3,H,W]. Features are split at the tap point (backbone layer 1, stride 4) for cost volume computation. Only left features continue through the remaining backbone and head.</p>
+<p><strong>Config</strong>: YOLO26 + siamese, SGD 1000ep, <code>filter_occluded=False</code>, 6 GPUs. Same recipe as v35.</p>
+<p><strong>R40 Results (KITTI-standard, 3-class multi-class)</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Size</th>
+          <th>Params</th>
+          <th>Mean Mod @0.5</th>
+          <th>Mean Mod @0.7</th>
+          <th>Car Mod @0.5</th>
+          <th>Car Mod @0.7</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>n</td>
+          <td>3.6M</td>
+          <td>48.1%</td>
+          <td>29.9%</td>
+          <td>70.7%</td>
+          <td>42.4%</td>
+      </tr>
+      <tr>
+          <td>s</td>
+          <td>11.6M</td>
+          <td>48.3%</td>
+          <td>29.4%</td>
+          <td>71.7%</td>
+          <td>42.3%</td>
+      </tr>
+      <tr>
+          <td>m</td>
+          <td>26.7M</td>
+          <td>49.0%</td>
+          <td>29.1%</td>
+          <td>71.1%</td>
+          <td>39.1%</td>
+      </tr>
+      <tr>
+          <td>l</td>
+          <td>31.2M</td>
+          <td><strong>50.9%</strong></td>
+          <td><strong>31.6%</strong></td>
+          <td>71.3%</td>
+          <td>41.8%</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>vs v35 (groups=2, R40 Moderate)</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Metric</th>
+          <th>v35-s</th>
+          <th>v36-s</th>
+          <th>v36-l</th>
+          <th>Δ (s)</th>
+          <th>Δ (l)</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Mean @0.5</td>
+          <td>48.1%</td>
+          <td>48.3%</td>
+          <td><strong>50.9%</strong></td>
+          <td>+0.2</td>
+          <td><strong>+2.8</strong></td>
+      </tr>
+      <tr>
+          <td>Mean @0.7</td>
+          <td>30.1%</td>
+          <td>29.4%</td>
+          <td><strong>31.6%</strong></td>
+          <td>-0.7</td>
+          <td><strong>+1.5</strong></td>
+      </tr>
+      <tr>
+          <td>Car @0.5</td>
+          <td>71.8%</td>
+          <td>71.7%</td>
+          <td>71.3%</td>
+          <td>-0.1</td>
+          <td>-0.5</td>
+      </tr>
+      <tr>
+          <td>Car @0.7</td>
+          <td>41.2%</td>
+          <td>42.3%</td>
+          <td>41.8%</td>
+          <td>+1.1</td>
+          <td>+0.6</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Key finding</strong>: Siamese matches groups=2 at R40 level across all sizes. l-size (50.9%) is new best Mean Moderate <a href="mailto:AP3D@0.5">AP3D@0.5</a>, unlike groups=2 where l overfits. The siamese shared backbone may regularize better at larger model sizes.</p>
+<p><strong>Car-only (nc=1) training FAILED</strong>: s=2.87% <a href="mailto:AP3D@0.5">AP3D@0.5</a>, n=2.16% after 280 epochs. Depth DFLoss stuck at ~5.0 (3-class converges to 2.5 by ep10). Model predicts all depths at ~17-18m (depth branch collapsed). Root cause: TAL with nc=1 binary classifier provides insufficient gradient diversity for auxiliary branches. <strong>Workaround</strong>: use per-class Car results from multi-class model for benchmark tables.</p>
+<p><strong>Speed benchmarks</strong> (single Blackwell RTX PRO 6000, batch=1, fp16, 384×1248):</p>
+<table>
+  <thead>
+      <tr>
+          <th>Size</th>
+          <th>Params</th>
+          <th>GFLOPs</th>
+          <th>Inference</th>
+          <th>FPS</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>n</td>
+          <td>3.6M</td>
+          <td>7.3G</td>
+          <td>7.9ms</td>
+          <td>127</td>
+      </tr>
+      <tr>
+          <td>s</td>
+          <td>11.6M</td>
+          <td>18.5G</td>
+          <td>8.2ms</td>
+          <td>122</td>
+      </tr>
+      <tr>
+          <td>m</td>
+          <td>26.8M</td>
+          <td>60.9G</td>
+          <td>9.0ms</td>
+          <td>111</td>
+      </tr>
+      <tr>
+          <td>l</td>
+          <td>31.2M</td>
+          <td>—</td>
+          <td>13.9ms</td>
+          <td>72</td>
+      </tr>
+  </tbody>
+</table>
+<p>All sizes are well within real-time (&gt;30 FPS). n-size at 127 FPS is attractive for deployment.</p>
+<p><strong>Status</strong>: Complete. All 4 sizes evaluated with R40. Car-only nc=1 approach abandoned (use multi-class per-class results).</p>
+<hr>
+<h2 id="6-key-findings">6. Key Findings<a hidden class="anchor" aria-hidden="true" href="#6-key-findings">#</a></h2>
+<h3 id="61-what-worked">6.1 What Worked<a hidden class="anchor" aria-hidden="true" href="#61-what-worked">#</a></h3>
+<ol>
+<li>
+<p><strong>StereoCostVolume (+18pp)</strong>: The single biggest architectural improvement. Explicit disparity correlation at 24 offsets provides stereo matching cues that the backbone cannot learn implicitly. Cost: only +0.7% parameters.</p>
+</li>
+<li>
+<p><strong>DFL-Style Depth Bins (+6.6pp)</strong>: Replacing scalar depth regression with 16-bin classification using Distribution Focal Loss. Provides more stable gradients and natural confidence calibration. The second-largest single-change improvement.</p>
+</li>
+<li>
+<p><strong>Long SGD Training (+6pp)</strong>: Extending from 200 to 1000 SGD epochs yielded +6.2pp for s-size. The model was significantly underfitting at 200 epochs.</p>
+</li>
+<li>
+<p><strong>Depth-Only Cost Volume Routing (+2-5pp over merged)</strong>: Separating 2D detection from 3D depth estimation in the head avoids task conflict. P3 stays clean for 2D boxes; cost volume enriches only depth branches.</p>
+</li>
+<li>
+<p><strong>SGD Finetuning (+6-8pp)</strong>: Consistently improves over AdamW-only training. Two-stage recipe (200ep AdamW → 200ep SGD) is better than pure SGD.</p>
+</li>
+<li>
+<p><strong>Loss Weight Rebalancing (+1-2pp)</strong>: Increasing depth loss weights from 0.1 to 1.0 (and lr_distance from 0.2 to 2.0) ensures the network actually optimizes for depth, which was previously dwarfed by the box loss (7.5).</p>
+</li>
+<li>
+<p><strong>Log-Space Depth Targets (+14pp)</strong>: Converting lr_distance targets from raw disparity [0.01, 0.22] to log-space [-4.6, -1.5] dramatically improved training stability. <a href="mailto:AP3D@0.5">AP3D@0.5</a> tripled from 7.4% to 21.1%.</p>
+</li>
+<li>
+<p><strong>Augmentation (+1-2pp)</strong>: Stereo-safe augmentations (horizontal flip with view swap, HSV) provide modest regularization benefit.</p>
+</li>
+<li>
+<p><strong>Siamese Backbone (v36)</strong>: Weight-shared 3ch backbone via batch trick matches groups=2 quality with 100% pretrained weight compatibility. n-size matches s-size on KITTI — 3.2x fewer params for equal accuracy.</p>
+</li>
+<li>
+<p><strong>Disabling Occlusion Filter (v35, +3.5pp Hard)</strong>: Training on all objects including heavily occluded improves Hard difficulty by +3.5pp @0.5 with only -1.7pp Moderate regression. Car <a href="mailto:Hard@0.5">Hard@0.5</a>: +12.2pp.</p>
+</li>
+</ol>
+<h3 id="62-what-didnt-work">6.2 What Didn&rsquo;t Work<a hidden class="anchor" aria-hidden="true" href="#62-what-didnt-work">#</a></h3>
+<ol>
+<li>
+<p><strong>Laplacian NLL Loss (v8)</strong>: Loss went negative from epoch 4 — the network learned to predict infinite uncertainty to zero out the loss.</p>
+</li>
+<li>
+<p><strong>Inline StereoCorrelation (v9-v11)</strong>: Inserting correlation into the main feature pathway is neutral. Unlike the cost volume (separate pathway to depth branches), inline correlation dilutes backbone features.</p>
+</li>
+<li>
+<p><strong>Distance-Aware Loss Weighting (v9-v10)</strong>: Weighting closer objects higher didn&rsquo;t help — the TAL assignment already biases toward well-matched (often closer) objects.</p>
+</li>
+<li>
+<p><strong>Sigma/Uncertainty Supervision (v10)</strong>: Training the network to predict its own uncertainty for decode-time fusion created optimization conflicts.</p>
+</li>
+<li>
+<p><strong>RAFT-Stereo Depth Prior (v22)</strong>: Competitive but adds offline RAFT-Stereo dependency (~3s/frame). Not worth the complexity vs the learned cost volume.</p>
+</li>
+<li>
+<p><strong>Knowledge Distillation (v23-v25)</strong>: All variants hurt performance by 3-7pp. Teacher and student learn fundamentally different representations.</p>
+</li>
+<li>
+<p><strong>YOLO26 Backbone (v15-v16)</strong>: Marginal improvement (~1pp) over YOLO11. Architecture is not the bottleneck.</p>
+</li>
+<li>
+<p><strong>Multi-Scale Cost Volume (v27-v29)</strong>: All variants worse than single-scale. The coarser resolution loses the sub-pixel precision that matters for depth. Architecture itself hurt even without disparity loss.</p>
+</li>
+<li>
+<p><strong>Car-Only Single-Class Training (v36)</strong>: nc=1 models completely fail — depth branch collapses (DFLoss stuck at 5.0, all predictions at ~17m). TAL with binary classifier provides insufficient gradient diversity for auxiliary 3D branches. Use per-class results from multi-class models instead.</p>
+</li>
+<li>
+<p><strong>Depth Residual Offset (v32)</strong>: Adding a regression channel alongside DFL bins hurt by -4.2pp. The shared hidden layers can&rsquo;t serve both classification and regression well. Sub-bin precision is not the current bottleneck.</p>
+</li>
+<li>
+<p><strong>Fitness Function Bug (v30)</strong>: Silently saving best.pt by 2D fitness instead of 3D fitness caused all prior experiments to report wrong best checkpoints. Always verify that your selection metric matches your evaluation metric.</p>
+</li>
+<li>
+<p><strong>32 Depth Bins (v33b)</strong>: 32 bins ≈ same <a href="mailto:AP3D@0.5">AP3D@0.5</a> as 16 bins but slightly worse @0.7. Not worth the added complexity.</p>
+</li>
+</ol>
+<h3 id="63-lessons-learned">6.3 Lessons Learned<a hidden class="anchor" aria-hidden="true" href="#63-lessons-learned">#</a></h3>
+<ul>
+<li><strong>Isolate variables</strong>: v9 combined 3 changes and was impossible to interpret. v11 (single change) clearly showed StereoCorrelation is neutral.</li>
+<li><strong>Depth is the #1 bottleneck</strong>: Oracle analysis shows +17pp headroom from perfect depth (at current v31 level). Every successful experiment directly improved depth estimation.</li>
+<li><strong>2D-3D task conflict is real</strong>: Routing cost volume features only to depth branches (v20) outperforms merging into P3 (v17) by 2-5pp.</li>
+<li><strong>Classification &gt; regression for depth</strong>: DFL bins (+6.6pp) succeeded where all regression enhancements (Laplacian, uncertainty, residual) failed. Discrete distributions are more trainable than unbounded scalars.</li>
+<li><strong>Don&rsquo;t add complexity to working losses</strong>: Residual, uncertainty, distance-weighting — every attempt to &ldquo;improve&rdquo; the depth loss made it worse. The simplest loss (DFLoss for bins, smooth_l1 for other aux) is the best.</li>
+<li><strong>s-size is the sweet spot (groups=2), n-size for siamese</strong>: With groups=2 backbone, s-size outperforms n by 3-6pp. But with siamese backbone (v36), n matches s — 3.2x fewer params for equal accuracy. KITTI&rsquo;s small dataset limits larger models.</li>
+<li><strong>Train longer</strong>: v26/v30 showed +6pp from 200→1000 epochs. v31 peaked at ep700. Don&rsquo;t underestimate the value of patience.</li>
+<li><strong>Simple weight tuning &gt; architecture changes</strong>: v33a (depth loss 1.0→3.0) gained +3.5pp with zero code changes, beating depth residual (v32, -4.2pp) and 32 bins (v33b, +3.2pp).</li>
+</ul>
+<hr>
+<h2 id="7-error-analysis">7. Error Analysis<a hidden class="anchor" aria-hidden="true" href="#7-error-analysis">#</a></h2>
+<p>Oracle ablation analysis (substituting one predicted component with ground truth) on the v12 checkpoint:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Oracle Component</th>
+          <th><a href="mailto:AP3D@0.5">AP3D@0.5</a></th>
+          <th><a href="mailto:AP3D@0.7">AP3D@0.7</a></th>
+          <th>Change vs Baseline</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Baseline (no oracle)</td>
+          <td>28.5%</td>
+          <td>17.5%</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td><strong>Oracle Depth</strong></td>
+          <td><strong>54.5%</strong></td>
+          <td><strong>49.6%</strong></td>
+          <td><strong>+26.0pp / +32.1pp</strong></td>
+      </tr>
+      <tr>
+          <td>Oracle Dimensions</td>
+          <td>28.7%</td>
+          <td>18.3%</td>
+          <td>+0.2pp / +0.8pp</td>
+      </tr>
+      <tr>
+          <td>Oracle Orientation</td>
+          <td>24.2%</td>
+          <td>14.0%</td>
+          <td>-4.3pp / -3.5pp</td>
+      </tr>
+      <tr>
+          <td>Oracle All</td>
+          <td>49.1%</td>
+          <td>48.9%</td>
+          <td>+20.6pp / +31.4pp</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="per-component-error-statistics">Per-Component Error Statistics<a hidden class="anchor" aria-hidden="true" href="#per-component-error-statistics">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Component</th>
+          <th>Mean Error</th>
+          <th>Median Error</th>
+          <th>Relative Error</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Depth</td>
+          <td>0.81m</td>
+          <td>0.66m</td>
+          <td>5.1%</td>
+      </tr>
+      <tr>
+          <td>Dimensions (L)</td>
+          <td>0.20m</td>
+          <td>—</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>Dimensions (W)</td>
+          <td>0.05m</td>
+          <td>—</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>Dimensions (H)</td>
+          <td>0.05m</td>
+          <td>—</td>
+          <td>—</td>
+      </tr>
+      <tr>
+          <td>Orientation</td>
+          <td>16.4°</td>
+          <td>6.6°</td>
+          <td>—</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="interpretation">Interpretation<a hidden class="anchor" aria-hidden="true" href="#interpretation">#</a></h3>
+<ul>
+<li><strong>Depth is overwhelmingly the bottleneck</strong>: Perfect depth would nearly double <a href="mailto:AP3D@0.5">AP3D@0.5</a>. This motivated the cost volume experiments (v17+).</li>
+<li><strong>Dimensions are solved</strong>: Oracle dims provide only +0.2pp. The normalized offset prediction with class-specific priors works well.</li>
+<li><strong>Orientation oracle hurts</strong>: The -4.3pp drop suggests a matching artifact — oracle orientation changes the 3D IoU in unexpected ways due to the interaction between box center and heading angle.</li>
+</ul>
+<hr>
+<h2 id="8-failed-approaches">8. Failed Approaches<a hidden class="anchor" aria-hidden="true" href="#8-failed-approaches">#</a></h2>
+<h3 id="81-laplacian-nll-v8">8.1 Laplacian NLL (v8)<a hidden class="anchor" aria-hidden="true" href="#81-laplacian-nll-v8">#</a></h3>
+<p><strong>Hypothesis</strong>: Per-sample uncertainty would down-weight hard examples and improve depth estimation.</p>
+<p><strong>Why it failed</strong>: The loss function <code>L = |y - pred| * exp(-log_sigma) + log_sigma</code> has a pathological minimum at <code>log_sigma → ∞</code>, which drives the loss to <code>-∞</code>. Without careful regularization, the network exploits this by predicting maximum uncertainty for all samples.</p>
+<h3 id="82-stereocorrelation-module-v9-v11">8.2 StereoCorrelation Module (v9-v11)<a hidden class="anchor" aria-hidden="true" href="#82-stereocorrelation-module-v9-v11">#</a></h3>
+<p><strong>Hypothesis</strong>: Explicit left-right correlation features would improve depth.</p>
+<p><strong>Why it failed</strong>: When inserted into the main backbone pathway, correlation features compete with appearance features needed for 2D detection and classification. The cost volume approach (v17) succeeds because it provides correlation as a <strong>separate, additive signal</strong> only to depth branches.</p>
+<h3 id="83-raft-stereo-distillation-v23-v25">8.3 RAFT-Stereo Distillation (v23-v25)<a hidden class="anchor" aria-hidden="true" href="#83-raft-stereo-distillation-v23-v25">#</a></h3>
+<p><strong>Hypothesis</strong>: A student model could learn to predict RAFT-quality depth without the RAFT-Stereo network at inference time.</p>
+<p><strong>Why it failed</strong>: RAFT-Stereo produces dense, high-precision disparity maps using iterative refinement — a fundamentally different representation than the sparse, per-anchor predictions of the YOLO head. Forcing alignment between these representations through MSE or L1 distillation creates conflicting gradients with the primary 3D detection loss.</p>
+<h3 id="84-combined-changes-v9-v10">8.4 Combined Changes (v9, v10)<a hidden class="anchor" aria-hidden="true" href="#84-combined-changes-v9-v10">#</a></h3>
+<p><strong>Hypothesis</strong>: Multiple improvements should compound.</p>
+<p><strong>Why it failed</strong>: Optimization dynamics are nonlinear. Each change shifts the loss landscape, and combinations can create interference patterns. v9 combined 3 changes and only improved n-size while catastrophically hurting s/m. The lesson: always test changes in isolation first.</p>
+<h3 id="85-multi-scale-cost-volume-pyramid-v27-v29">8.5 Multi-Scale Cost Volume Pyramid (v27-v29)<a hidden class="anchor" aria-hidden="true" href="#85-multi-scale-cost-volume-pyramid-v27-v29">#</a></h3>
+<p><strong>Hypothesis</strong>: Cost volumes at multiple resolutions (stride 4, 8, 16) would capture disparities at different scales.</p>
+<p><strong>Why it failed</strong>: The coarser cost volumes (stride 8, 16) lose spatial precision without providing useful additional information. Depth estimation is fundamentally a high-resolution matching task — coarse features add noise, not signal. Even without the disparity loss (v29 no-disp), the multi-scale architecture alone hurt by -7.5pp vs single-scale.</p>
+<h3 id="86-depth-residual-offset-v32">8.6 Depth Residual Offset (v32)<a hidden class="anchor" aria-hidden="true" href="#86-depth-residual-offset-v32">#</a></h3>
+<p><strong>Hypothesis</strong>: A learned residual on top of DFL bin-decoded depth would provide sub-bin precision.</p>
+<p><strong>Why it failed</strong>: The 17th channel (residual) shares the same 3-layer hidden network as the 16 bin logits. The smooth_l1 regression gradient from the residual competes with the DFL classification gradient from the bins in the shared layers, degrading both tasks. The residual target (gt - coarse_depth.detach()) was correctly computed without gradient flow, but the shared features still suffered from the multi-task conflict. Result: -4.2pp regression.</p>
+<hr>
+<h2 id="9-current-best-configuration">9. Current Best Configuration<a hidden class="anchor" aria-hidden="true" href="#9-current-best-configuration">#</a></h2>
+<h3 id="model">Model<a hidden class="anchor" aria-hidden="true" href="#model">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#75715e"># yolo26s-stereo3ddet-siamese.yaml (v36 — recommended)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Architecture</span>: <span style="color:#ae81ff">YOLO26 backbone + siamese weight-shared + StereoCostVolume</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Input</span>: <span style="color:#ae81ff">6</span> <span style="color:#ae81ff">channels (left RGB + right RGB), processed as [2B,3,H,W] batch trick</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Cost volume</span>: <span style="color:#ae81ff">24</span> <span style="color:#ae81ff">disparity bins, 64 output channels, routed to depth branches only</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Head</span>: <span style="color:#ae81ff">Stereo3DDetHeadYOLO11 with P3/P4/P5 + cost_vol input</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">Pretrained</span>: <span style="color:#ae81ff">100</span><span style="color:#ae81ff">% compatible with standard YOLO26 weights</span>
+</span></span></code></pre></div><p>Alternative (v35): <code>yolo26s-stereo3ddet-costvol.yaml</code> with groups=2 stem — slightly higher Moderate AP but no pretrained compatibility.</p>
+<h3 id="training-recipe">Training Recipe<a hidden class="anchor" aria-hidden="true" href="#training-recipe">#</a></h3>
+<pre tabindex="0"><code>SGD lr=0.01, cosine decay to lr*0.01, 1000 epochs
+Augmentation: fliplr=0.5, hsv_h=0.015, hsv_s=0.4, hsv_v=0.3
+Batch: 128 (n), 64 (s), 32 (m), 16 (l)
+Image size: 384x1248
+Patience: 200 (early stopping based on AP3D@0.5 fitness)
+filter_occluded: False (train on all objects including heavily occluded)
+</code></pre><h3 id="depth-branch">Depth Branch<a hidden class="anchor" aria-hidden="true" href="#depth-branch">#</a></h3>
+<pre tabindex="0"><code>Output: 16 channels (DFL bins in log-depth space)
+Bin range: linspace(log(2m), log(80m), 16) — bin width ≈ 0.245 log-units
+Decode: softmax(logits) → weighted sum → log-depth scalar
+Loss: DFLoss (cross-entropy with soft binning)
+Architecture: 3×Conv deep branch per scale, cost volume concat at P3
+</code></pre><h3 id="loss-weights">Loss Weights<a hidden class="anchor" aria-hidden="true" href="#loss-weights">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">lr_distance</span>: <span style="color:#ae81ff">2.0</span>   <span style="color:#75715e"># log-space disparity</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">depth</span>: <span style="color:#ae81ff">3.0</span>          <span style="color:#75715e"># DFL bin classification (log-space direct depth)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">dimensions</span>: <span style="color:#ae81ff">1.0</span>     <span style="color:#75715e"># normalized offset</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">orientation</span>: <span style="color:#ae81ff">1.0</span>    <span style="color:#75715e"># sin/cos encoding</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">box</span>: <span style="color:#ae81ff">7.5</span>            <span style="color:#75715e"># standard YOLO box loss</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">cls</span>: <span style="color:#ae81ff">0.5</span>            <span style="color:#75715e"># standard YOLO cls loss</span>
+</span></span></code></pre></div><h3 id="best-results">Best Results<a hidden class="anchor" aria-hidden="true" href="#best-results">#</a></h3>
+<p><strong>R40 evaluation (KITTI-standard, v36 siamese)</strong>:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Size</th>
+          <th>Mean Mod @0.5</th>
+          <th>Mean Mod @0.7</th>
+          <th>Car Mod @0.5</th>
+          <th>Car Mod @0.7</th>
+          <th>FPS</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>n</td>
+          <td>48.1%</td>
+          <td>29.9%</td>
+          <td>70.7%</td>
+          <td>42.4%</td>
+          <td>127</td>
+      </tr>
+      <tr>
+          <td>s</td>
+          <td>48.3%</td>
+          <td>29.4%</td>
+          <td>71.7%</td>
+          <td>42.3%</td>
+          <td>122</td>
+      </tr>
+      <tr>
+          <td>m</td>
+          <td>49.0%</td>
+          <td>29.1%</td>
+          <td>71.1%</td>
+          <td>39.1%</td>
+          <td>111</td>
+      </tr>
+      <tr>
+          <td>l</td>
+          <td><strong>50.9%</strong></td>
+          <td><strong>31.6%</strong></td>
+          <td>71.3%</td>
+          <td>41.8%</td>
+          <td>72</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="remaining-headroom">Remaining Headroom<a hidden class="anchor" aria-hidden="true" href="#remaining-headroom">#</a></h3>
+<p>Oracle analysis (from v12 baseline) showed +26pp from perfect depth. Remaining depth error is primarily in feature extraction and stereo matching quality, not the output representation.</p>
+<p><strong>Potential future directions</strong>:</p>
+<ul>
+<li>Wider cost volume disparity coverage (currently 24 offsets × 2px = 48px at stride 4 → max ~192px full-res)</li>
+<li>Higher resolution training (384×1248 → 480×1560)</li>
+<li>Attention-based cost volume (replace dot-product with cross-attention)</li>
+<li>Test pretrained weight loading with siamese backbone (main benefit not yet exploited)</li>
+<li>Curriculum learning or multi-task pretraining to improve auxiliary branch gradient quality</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://bovey0809.github.io/">Codemylife</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

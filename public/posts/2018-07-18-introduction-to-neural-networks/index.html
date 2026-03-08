@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Introduction to Neural Networks | Codemylife</title>
+<meta name="keywords" content="">
+<meta name="description" content="Bug: The latex math equation can&rsquo;t be displayed on emacs.
+
+Situation: I remember that it can be displayed in the past.
+Solution: Git clone again from the web.
+
+Perceptron
+
+What is the perceptron?
+Translation: 感知机
+It is mainly constructed as &rsquo;linear function&rsquo; &#43;  &lsquo;step function&rsquo;.
+$wx&#43;b$
+It is the node as in the neural network.
+
+Use perceptron to represent Logitcal Operations.
+
+  
+      
+          
+          w1
+          w2
+          b
+      
+  
+  
+      
+          and
+          0.9
+          0.9
+          -1
+      
+      
+          not
+          1
+          -3
+          1
+      
+  
+
+Perctron Algorithm
+st=&gt;start: Points(p, q), label y
+e=&gt;end: W, b
+op1=&gt;operation: d
+sub1=&gt;subroutine: My Subroutine
+cond=&gt;condition: y^ - y == 0
+io=&gt;inputoutput: catch something...
+
+st-&gt;op1-&gt;cond
+cond(yes)-&gt;io-&gt;e
+cond(no)-&gt;sub1(right)-&gt;op1
+Error Function
+
+Log-loss Error Function
+
+Error Function should not be discrete, it should be continuous.
+
+Because every small error should be represented in the loss function.
+In mathmatical way, it is called as &lsquo;differentiable and continuous.&rsquo;
+
+
+
+
+Discrete vs Continuous Predictions
+
+Change the prediction into continuous values.
+
+Step Function -&gt; Sigmoid Function
+
+
+
+
+
+Softmax
+
+It is the equivalent as sigmoid function.
+$Softmax(x) = \frac{e^{x_i}}{\sum_{i}^{n}e^{x_i}}$
+
+$\forall{x},  e^{x_i}&gt;0$, so it use $e^{x_i}$ exponent function.
+
+
+
+Maximum Likelihood
+
+if we have the continuous function as $\hat{y}=\sigma(Wx&#43;b)$.
+We want to maximax the model to output the right predictions.
+Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood.
+
+Maximizing Probabilities
+
+Use the maximum likelihood be a error function.
+Product will make the probabilities be very small.
+Thus we want to use sum.
+
+Then we should use logarithm.
+
+
+
+Cross Entropy
+
+Use logorithm to change possibility into sum format.
+
+Example: ln(prob) &lt; 0
+
+
+Change the sign of logarithm, -ln(prob)
+This is called cross entropy.
+Smaller number means the model is better.
+
+Cross entrpy formular
+$\textbf{Cross-Entropy} = -\sum_{i}^{m} y_iln(p)&#43;(1-y_i)ln(1-p_i)$">
+<meta name="author" content="Bowei Hou">
+<link rel="canonical" href="https://bovey0809.github.io/posts/2018-07-18-introduction-to-neural-networks/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.da3211e5ef867bf2b75fd5a6515cfed7195c011e8ab735694e203810a827097b.css" integrity="sha256-2jIR5e&#43;Ge/K3X9WmUVz&#43;1xlcAR6KtzVpTiA4EKgnCXs=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://bovey0809.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://bovey0809.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://bovey0809.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://bovey0809.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://bovey0809.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://bovey0809.github.io/posts/2018-07-18-introduction-to-neural-networks/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://bovey0809.github.io/posts/2018-07-18-introduction-to-neural-networks/">
+  <meta property="og:site_name" content="Codemylife">
+  <meta property="og:title" content="Introduction to Neural Networks">
+  <meta property="og:description" content="Bug: The latex math equation can’t be displayed on emacs. Situation: I remember that it can be displayed in the past. Solution: Git clone again from the web. Perceptron What is the perceptron? Translation: 感知机 It is mainly constructed as ’linear function’ &#43; ‘step function’. $wx&#43;b$ It is the node as in the neural network. Use perceptron to represent Logitcal Operations. w1 w2 b and 0.9 0.9 -1 not 1 -3 1 Perctron Algorithm st=&gt;start: Points(p, q), label y e=&gt;end: W, b op1=&gt;operation: d sub1=&gt;subroutine: My Subroutine cond=&gt;condition: y^ - y == 0 io=&gt;inputoutput: catch something... st-&gt;op1-&gt;cond cond(yes)-&gt;io-&gt;e cond(no)-&gt;sub1(right)-&gt;op1 Error Function Log-loss Error Function Error Function should not be discrete, it should be continuous. Because every small error should be represented in the loss function. In mathmatical way, it is called as ‘differentiable and continuous.’ Discrete vs Continuous Predictions Change the prediction into continuous values. Step Function -&gt; Sigmoid Function Softmax It is the equivalent as sigmoid function. $Softmax(x) = \frac{e^{x_i}}{\sum_{i}^{n}e^{x_i}}$ $\forall{x}, e^{x_i}&gt;0$, so it use $e^{x_i}$ exponent function. Maximum Likelihood if we have the continuous function as $\hat{y}=\sigma(Wx&#43;b)$. We want to maximax the model to output the right predictions. Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood. Maximizing Probabilities Use the maximum likelihood be a error function. Product will make the probabilities be very small. Thus we want to use sum. Then we should use logarithm. Cross Entropy Use logorithm to change possibility into sum format. Example: ln(prob) &lt; 0 Change the sign of logarithm, -ln(prob) This is called cross entropy. Smaller number means the model is better. Cross entrpy formular $\textbf{Cross-Entropy} = -\sum_{i}^{m} y_iln(p)&#43;(1-y_i)ln(1-p_i)$">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2018-07-18T00:00:00+00:00">
+    <meta property="article:modified_time" content="2018-07-18T00:00:00+00:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Introduction to Neural Networks">
+<meta name="twitter:description" content="Bug: The latex math equation can&rsquo;t be displayed on emacs.
+
+Situation: I remember that it can be displayed in the past.
+Solution: Git clone again from the web.
+
+Perceptron
+
+What is the perceptron?
+Translation: 感知机
+It is mainly constructed as &rsquo;linear function&rsquo; &#43;  &lsquo;step function&rsquo;.
+$wx&#43;b$
+It is the node as in the neural network.
+
+Use perceptron to represent Logitcal Operations.
+
+  
+      
+          
+          w1
+          w2
+          b
+      
+  
+  
+      
+          and
+          0.9
+          0.9
+          -1
+      
+      
+          not
+          1
+          -3
+          1
+      
+  
+
+Perctron Algorithm
+st=&gt;start: Points(p, q), label y
+e=&gt;end: W, b
+op1=&gt;operation: d
+sub1=&gt;subroutine: My Subroutine
+cond=&gt;condition: y^ - y == 0
+io=&gt;inputoutput: catch something...
+
+st-&gt;op1-&gt;cond
+cond(yes)-&gt;io-&gt;e
+cond(no)-&gt;sub1(right)-&gt;op1
+Error Function
+
+Log-loss Error Function
+
+Error Function should not be discrete, it should be continuous.
+
+Because every small error should be represented in the loss function.
+In mathmatical way, it is called as &lsquo;differentiable and continuous.&rsquo;
+
+
+
+
+Discrete vs Continuous Predictions
+
+Change the prediction into continuous values.
+
+Step Function -&gt; Sigmoid Function
+
+
+
+
+
+Softmax
+
+It is the equivalent as sigmoid function.
+$Softmax(x) = \frac{e^{x_i}}{\sum_{i}^{n}e^{x_i}}$
+
+$\forall{x},  e^{x_i}&gt;0$, so it use $e^{x_i}$ exponent function.
+
+
+
+Maximum Likelihood
+
+if we have the continuous function as $\hat{y}=\sigma(Wx&#43;b)$.
+We want to maximax the model to output the right predictions.
+Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood.
+
+Maximizing Probabilities
+
+Use the maximum likelihood be a error function.
+Product will make the probabilities be very small.
+Thus we want to use sum.
+
+Then we should use logarithm.
+
+
+
+Cross Entropy
+
+Use logorithm to change possibility into sum format.
+
+Example: ln(prob) &lt; 0
+
+
+Change the sign of logarithm, -ln(prob)
+This is called cross entropy.
+Smaller number means the model is better.
+
+Cross entrpy formular
+$\textbf{Cross-Entropy} = -\sum_{i}^{m} y_iln(p)&#43;(1-y_i)ln(1-p_i)$">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://bovey0809.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Introduction to Neural Networks",
+      "item": "https://bovey0809.github.io/posts/2018-07-18-introduction-to-neural-networks/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Introduction to Neural Networks",
+  "name": "Introduction to Neural Networks",
+  "description": "Bug: The latex math equation can\u0026rsquo;t be displayed on emacs. Situation: I remember that it can be displayed in the past. Solution: Git clone again from the web. Perceptron What is the perceptron? Translation: 感知机 It is mainly constructed as \u0026rsquo;linear function\u0026rsquo; + \u0026lsquo;step function\u0026rsquo;. $wx+b$ It is the node as in the neural network. Use perceptron to represent Logitcal Operations. w1 w2 b and 0.9 0.9 -1 not 1 -3 1 Perctron Algorithm st=\u0026gt;start: Points(p, q), label y e=\u0026gt;end: W, b op1=\u0026gt;operation: d sub1=\u0026gt;subroutine: My Subroutine cond=\u0026gt;condition: y^ - y == 0 io=\u0026gt;inputoutput: catch something... st-\u0026gt;op1-\u0026gt;cond cond(yes)-\u0026gt;io-\u0026gt;e cond(no)-\u0026gt;sub1(right)-\u0026gt;op1 Error Function Log-loss Error Function Error Function should not be discrete, it should be continuous. Because every small error should be represented in the loss function. In mathmatical way, it is called as \u0026lsquo;differentiable and continuous.\u0026rsquo; Discrete vs Continuous Predictions Change the prediction into continuous values. Step Function -\u0026gt; Sigmoid Function Softmax It is the equivalent as sigmoid function. $Softmax(x) = \\frac{e^{x_i}}{\\sum_{i}^{n}e^{x_i}}$ $\\forall{x}, e^{x_i}\u0026gt;0$, so it use $e^{x_i}$ exponent function. Maximum Likelihood if we have the continuous function as $\\hat{y}=\\sigma(Wx+b)$. We want to maximax the model to output the right predictions. Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood. Maximizing Probabilities Use the maximum likelihood be a error function. Product will make the probabilities be very small. Thus we want to use sum. Then we should use logarithm. Cross Entropy Use logorithm to change possibility into sum format. Example: ln(prob) \u0026lt; 0 Change the sign of logarithm, -ln(prob) This is called cross entropy. Smaller number means the model is better. Cross entrpy formular $\\textbf{Cross-Entropy} = -\\sum_{i}^{m} y_iln(p)+(1-y_i)ln(1-p_i)$\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "Bug: The latex math equation can’t be displayed on emacs. Situation: I remember that it can be displayed in the past. Solution: Git clone again from the web. Perceptron What is the perceptron? Translation: 感知机 It is mainly constructed as ’linear function’ + ‘step function’. $wx+b$ It is the node as in the neural network. Use perceptron to represent Logitcal Operations. w1 w2 b and 0.9 0.9 -1 not 1 -3 1 Perctron Algorithm st=\u003estart: Points(p, q), label y e=\u003eend: W, b op1=\u003eoperation: d sub1=\u003esubroutine: My Subroutine cond=\u003econdition: y^ - y == 0 io=\u003einputoutput: catch something... st-\u003eop1-\u003econd cond(yes)-\u003eio-\u003ee cond(no)-\u003esub1(right)-\u003eop1 Error Function Log-loss Error Function Error Function should not be discrete, it should be continuous. Because every small error should be represented in the loss function. In mathmatical way, it is called as ‘differentiable and continuous.’ Discrete vs Continuous Predictions Change the prediction into continuous values. Step Function -\u003e Sigmoid Function Softmax It is the equivalent as sigmoid function. $Softmax(x) = \\frac{e^{x_i}}{\\sum_{i}^{n}e^{x_i}}$ $\\forall{x}, e^{x_i}\u003e0$, so it use $e^{x_i}$ exponent function. Maximum Likelihood if we have the continuous function as $\\hat{y}=\\sigma(Wx+b)$. We want to maximax the model to output the right predictions. Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood. Maximizing Probabilities Use the maximum likelihood be a error function. Product will make the probabilities be very small. Thus we want to use sum. Then we should use logarithm. Cross Entropy Use logorithm to change possibility into sum format. Example: ln(prob) \u003c 0 Change the sign of logarithm, -ln(prob) This is called cross entropy. Smaller number means the model is better. Cross entrpy formular $\\textbf{Cross-Entropy} = -\\sum_{i}^{m} y_iln(p)+(1-y_i)ln(1-p_i)$\n$\\text{if } y_i=1, \\text{cross entropy} = \\sum y_i ln(p)$ if $y_i$ = 0, $\\text{cross entropy}=-\\sum ln(1-p)$ import numpy as np def cross_entropy(Y, P): Y = np.float_(Y) P = np.float_(P) return -np.sum(Y * np.log(P) + (1 - Y) * np.log(1 - P)) Multi-Class Cross-Entropy Formula: $\\text{cross entropy} =- \\sum \\sum y_{ij}ln(p_{ij})$ When m == 2, which means there are only two kinds, will the multi-cross entropy the same as the cross entropy.\nLogistic Regression Error Function (Two class)\nFor each case, y = 1, y = 0. if y =1, class 1(The first class) P(Class == 1) = $\\hat y$ Error = $-ln(\\hat y)$ Idea:If the class is 1, the P(probability) value should be more and the more the better. if y = 0, class 2 (The second class) There are only two classes, if it is not class 1, then it is class 2. P(class 2)=P(NOT class 1) = 1 - P(class 1) = $1 - \\hat y$ Error = $-ln(1-\\hat y)$ Idea: The same idea as class 1, we want to make P(class 2) higher. So that Error(class 2) should be lower. Total error $Error = - \\frac{1}{m} \\sum_{i=1}^{m} (1-y_i)(ln(1-\\hat y) + y_iln(\\hat y)$ Error Function (Multi-Classes)\nFormular $-\\frac{1}{m} \\sum_{i=1}^{m}\\sum_{j=1}^{n}y_{ij}ln(\\hat y_{ij})$ Tip: What if the classes n equals 2? For one X, which means m = 1. j $y_i$ Errror explain 1 1 $-ln(\\hat y)$ i is class 1 and make Error samller. 1 0 0 i is class 1 and predict. 2 1 $-ln(1-\\hat y)$ i is class 2 and make the error 2 0 0 i is class 2 and predict. So that the Error will only calculate the value when for every predict class. The error function is trying to promote the possibility for every predict\nGradient Descent Gradient Calculation $\\sigma^\\prime = \\sigma(x)(1-\\sigma(x))$ $\\sigma(x)$ is the sigmoid function. calculate W, b seperately. $\\frac{\\partial{E}}{\\partial W_j}=(\\hat y - y)x_j $ $\\frac{\\partial E}{\\partial b} = (\\hat y -y)$ Calculate gradient of Error(E) for one element X $X \\in R^{m\\times n}$ $X^i \\in R^{1\\times n}$ $\\nabla E = (\\hat y - y )(x_1, \\dots , x_n, 1)$ Gradient Descent Step Update W, and b. $w^\\prime _i \\leftarrow w_i -\\alpha (\\hat y - y)x_i$ $b^\\prime \\leftarrow b - \\alpha(\\hat y - y )$ $\\Delta w_i = \\alpha \\times \\delta \\times x_i$ $\\delta=\\hat y -y$ is the error term Perceptron VS gradient descent In perceptron algorithm, the weights changed only when the classfication is wrong. In gradient descent, the weights will change in each iteration. Use the Git to check the Quier notes. Use tool quiver2jekyll\nBug: Emacs Font tty is not defined. solution from github issue delete the desktop file saved before. Solved!\nUse mac ctrl-h as delete key in emacs. (global-set-key (kbd \"C-?\") 'help-command) (global-set-key (kbd \"M-?\") 'mark-paragraph) (global-set-key (kbd \"C-h\") 'delete-backward-char) (global-set-key (kbd \"M-h\") 'backward-kill-word) Add the above line into init-locals.el what is npm? Npm is a pakage manager for javascript.\nIt can be used in terminal line. npm publish reusable-code Making a column vector Use arr[: ,None] to create a column vector. ! The arr.T can’t trun a 1D row vector into 1D column vector. print(features) \u003e array([ 0.49671415, -0.1382643 , 0.64768854]) print(features.T) \u003e array([ 0.49671415, -0.1382643 , 0.64768854]) print(features[:, None]) \u003e array([[ 0.49671415], [-0.1382643 ], [ 0.64768854]]) ",
+  "wordCount" : "818",
+  "inLanguage": "en",
+  "datePublished": "2018-07-18T00:00:00Z",
+  "dateModified": "2018-07-18T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Bowei Hou"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://bovey0809.github.io/posts/2018-07-18-introduction-to-neural-networks/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Codemylife",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://bovey0809.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://bovey0809.github.io/" accesskey="h" title="Codemylife (Alt + H)">Codemylife</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://bovey0809.github.io/publications/" title="Publications">
+                    <span>Publications</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://bovey0809.github.io/posts/" title="Blog">
+                    <span>Blog</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://bovey0809.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://bovey0809.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://bovey0809.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Introduction to Neural Networks
+    </h1>
+    <div class="post-meta"><span title='2018-07-18 00:00:00 +0000 UTC'>July 18, 2018</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>Bowei Hou</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#bug-the-latex-math-equation-cant-be-displayed-on-emacs" aria-label="Bug: The latex math equation can&rsquo;t be displayed on emacs.">Bug: The latex math equation can&rsquo;t be displayed on emacs.</a></li>
+                <li>
+                    <a href="#perceptron" aria-label="Perceptron">Perceptron</a><ul>
+                        
+                <li>
+                    <a href="#use-perceptron-to-represent-logitcal-operations" aria-label="Use perceptron to represent Logitcal Operations.">Use perceptron to represent Logitcal Operations.</a></li></ul>
+                </li>
+                <li>
+                    <a href="#perctron-algorithm" aria-label="Perctron Algorithm">Perctron Algorithm</a></li>
+                <li>
+                    <a href="#error-function" aria-label="Error Function">Error Function</a></li>
+                <li>
+                    <a href="#softmax" aria-label="Softmax">Softmax</a></li>
+                <li>
+                    <a href="#maximum-likelihood" aria-label="Maximum Likelihood">Maximum Likelihood</a><ul>
+                        
+                <li>
+                    <a href="#maximizing-probabilities" aria-label="Maximizing Probabilities">Maximizing Probabilities</a><ul>
+                        
+                <li>
+                    <a href="#cross-entropy" aria-label="Cross Entropy">Cross Entropy</a></li>
+                <li>
+                    <a href="#cross-entrpy-formular" aria-label="Cross entrpy formular">Cross entrpy formular</a></li></ul>
+                </li>
+                <li>
+                    <a href="#multi-class-cross-entropy" aria-label="Multi-Class Cross-Entropy">Multi-Class Cross-Entropy</a></li></ul>
+                </li>
+                <li>
+                    <a href="#logistic-regression" aria-label="Logistic Regression">Logistic Regression</a></li>
+                <li>
+                    <a href="#gradient-descent" aria-label="Gradient Descent">Gradient Descent</a></li>
+                <li>
+                    <a href="#perceptron-vs-gradient-descent" aria-label="Perceptron VS gradient descent">Perceptron VS gradient descent</a></li>
+                <li>
+                    <a href="#use-the-git-to-check-the-quier-notes" aria-label="Use the Git to check the Quier notes.">Use the Git to check the Quier notes.</a></li>
+                <li>
+                    <a href="#bug-emacs-font-tty-is-not-defined" aria-label="Bug: Emacs Font tty is not defined.">Bug: Emacs Font tty is not defined.</a></li>
+                <li>
+                    <a href="#use-mac-ctrl-h-as-delete-key-in-emacs" aria-label="Use mac ctrl-h as delete key in emacs.">Use mac ctrl-h as delete key in emacs.</a></li>
+                <li>
+                    <a href="#what-is-npm" aria-label="what is npm?">what is npm?</a></li>
+                <li>
+                    <a href="#making-a-column-vector" aria-label="Making a column vector">Making a column vector</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h1 id="bug-the-latex-math-equation-cant-be-displayed-on-emacs">Bug: The latex math equation can&rsquo;t be displayed on emacs.<a hidden class="anchor" aria-hidden="true" href="#bug-the-latex-math-equation-cant-be-displayed-on-emacs">#</a></h1>
+<ol>
+<li>Situation: I remember that it can be displayed in the past.</li>
+<li>Solution: Git clone again from the web.</li>
+</ol>
+<h1 id="perceptron">Perceptron<a hidden class="anchor" aria-hidden="true" href="#perceptron">#</a></h1>
+<ol>
+<li>What is the perceptron?
+Translation: 感知机
+It is mainly constructed as &rsquo;linear function&rsquo; +  &lsquo;step function&rsquo;.
+$wx+b$
+It is the node as in the neural network.</li>
+</ol>
+<h2 id="use-perceptron-to-represent-logitcal-operations">Use perceptron to represent Logitcal Operations.<a hidden class="anchor" aria-hidden="true" href="#use-perceptron-to-represent-logitcal-operations">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>w1</th>
+          <th>w2</th>
+          <th>b</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>and</td>
+          <td>0.9</td>
+          <td>0.9</td>
+          <td>-1</td>
+      </tr>
+      <tr>
+          <td>not</td>
+          <td>1</td>
+          <td>-3</td>
+          <td>1</td>
+      </tr>
+  </tbody>
+</table>
+<h1 id="perctron-algorithm">Perctron Algorithm<a hidden class="anchor" aria-hidden="true" href="#perctron-algorithm">#</a></h1>
+<pre tabindex="0"><code class="language-flow" data-lang="flow">st=&gt;start: Points(p, q), label y
+e=&gt;end: W, b
+op1=&gt;operation: d
+sub1=&gt;subroutine: My Subroutine
+cond=&gt;condition: y^ - y == 0
+io=&gt;inputoutput: catch something...
+
+st-&gt;op1-&gt;cond
+cond(yes)-&gt;io-&gt;e
+cond(no)-&gt;sub1(right)-&gt;op1
+</code></pre><h1 id="error-function">Error Function<a hidden class="anchor" aria-hidden="true" href="#error-function">#</a></h1>
+<ul>
+<li>Log-loss Error Function
+<ul>
+<li>Error Function should not be discrete, it should be continuous.
+<ul>
+<li>Because every small error should be represented in the loss function.</li>
+<li>In mathmatical way, it is called as &lsquo;differentiable and continuous.&rsquo;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Discrete vs Continuous Predictions
+<ul>
+<li>Change the prediction into continuous values.
+<ul>
+<li>Step Function -&gt; Sigmoid Function</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="softmax">Softmax<a hidden class="anchor" aria-hidden="true" href="#softmax">#</a></h1>
+<ul>
+<li>It is the equivalent as sigmoid function.</li>
+<li>$Softmax(x) = \frac{e^{x_i}}{\sum_{i}^{n}e^{x_i}}$
+<ul>
+<li>$\forall{x},  e^{x_i}&gt;0$, so it use $e^{x_i}$ exponent function.</li>
+</ul>
+</li>
+</ul>
+<h1 id="maximum-likelihood">Maximum Likelihood<a hidden class="anchor" aria-hidden="true" href="#maximum-likelihood">#</a></h1>
+<ul>
+<li>if we have the continuous function as $\hat{y}=\sigma(Wx+b)$.</li>
+<li>We want to maximax the model to output the right predictions.</li>
+<li>Assume all the data are independent, then multiply each of them and make it the largest is called Maximum Likelihood.</li>
+</ul>
+<h2 id="maximizing-probabilities">Maximizing Probabilities<a hidden class="anchor" aria-hidden="true" href="#maximizing-probabilities">#</a></h2>
+<ul>
+<li>Use the maximum likelihood be a error function.</li>
+<li>Product will make the probabilities be very small.</li>
+<li>Thus we want to use sum.
+<ul>
+<li>Then we should use logarithm.</li>
+</ul>
+</li>
+</ul>
+<h3 id="cross-entropy">Cross Entropy<a hidden class="anchor" aria-hidden="true" href="#cross-entropy">#</a></h3>
+<ul>
+<li>Use logorithm to change possibility into sum format.
+<ul>
+<li>Example: ln(prob) &lt; 0</li>
+</ul>
+</li>
+<li>Change the sign of logarithm, -ln(prob)</li>
+<li>This is called cross entropy.</li>
+<li>Smaller number means the model is better.</li>
+</ul>
+<h3 id="cross-entrpy-formular">Cross entrpy formular<a hidden class="anchor" aria-hidden="true" href="#cross-entrpy-formular">#</a></h3>
+<p>$\textbf{Cross-Entropy} = -\sum_{i}^{m} y_iln(p)+(1-y_i)ln(1-p_i)$</p>
+<ul>
+<li>$\text{if } y_i=1, \text{cross entropy} = \sum y_i ln(p)$</li>
+<li>if $y_i$  = 0, $\text{cross entropy}=-\sum ln(1-p)$</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cross_entropy</span>(Y, P):
+</span></span><span style="display:flex;"><span>    Y <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>float_(Y)
+</span></span><span style="display:flex;"><span>    P <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>float_(P)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>np<span style="color:#f92672">.</span>sum(Y <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>log(P) <span style="color:#f92672">+</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> Y) <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>log(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> P))
+</span></span></code></pre></div><h2 id="multi-class-cross-entropy">Multi-Class Cross-Entropy<a hidden class="anchor" aria-hidden="true" href="#multi-class-cross-entropy">#</a></h2>
+<ul>
+<li>Formula: $\text{cross entropy} =- \sum \sum y_{ij}ln(p_{ij})$</li>
+</ul>
+<p>When m == 2, which means there are only two kinds, will the multi-cross entropy the same as the cross entropy.</p>
+<h1 id="logistic-regression">Logistic Regression<a hidden class="anchor" aria-hidden="true" href="#logistic-regression">#</a></h1>
+<ul>
+<li>
+<p>Error Function (Two class)</p>
+<ul>
+<li>For each case, y = 1, y = 0.</li>
+<li>if y =1, class 1(The first class)
+<ul>
+<li>P(Class == 1) = $\hat y$</li>
+<li>Error = $-ln(\hat y)$</li>
+<li>Idea:If the class is 1, the P(probability) value should be more and the more the better.</li>
+</ul>
+</li>
+<li>if y = 0, class 2 (The second class)
+<ul>
+<li>There are only two classes, if it is not class 1, then it is class 2.</li>
+<li>P(class 2)=P(NOT class 1) = 1 - P(class 1) = $1 - \hat y$</li>
+<li>Error = $-ln(1-\hat y)$</li>
+<li>Idea: The same idea as class 1, we want to make P(class 2) higher. So that Error(class 2) should be lower.</li>
+</ul>
+</li>
+<li>Total error
+<ul>
+<li>$Error = - \frac{1}{m} \sum_{i=1}^{m} (1-y_i)(ln(1-\hat y) + y_iln(\hat y)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Error Function (Multi-Classes)</p>
+<ul>
+<li>Formular
+<ul>
+<li>$-\frac{1}{m} \sum_{i=1}^{m}\sum_{j=1}^{n}y_{ij}ln(\hat y_{ij})$</li>
+</ul>
+</li>
+<li>Tip: What if the classes n equals 2?
+<ul>
+<li>For one X, which means m = 1.</li>
+</ul>
+<blockquote>
+<table>
+  <thead>
+      <tr>
+          <th>j</th>
+          <th>$y_i$</th>
+          <th>Errror</th>
+          <th>explain</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>1</td>
+          <td>1</td>
+          <td>$-ln(\hat y)$</td>
+          <td>i is class 1 and make Error samller.</td>
+      </tr>
+      <tr>
+          <td>1</td>
+          <td>0</td>
+          <td>0</td>
+          <td>i is class 1 and predict.</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>1</td>
+          <td>$-ln(1-\hat y)$</td>
+          <td>i is class 2 and make the error</td>
+      </tr>
+      <tr>
+          <td>2</td>
+          <td>0</td>
+          <td>0</td>
+          <td>i is class 2 and predict.</td>
+      </tr>
+  </tbody>
+</table>
+</blockquote>
+</li>
+</ul>
+<p>So that the Error will only calculate the value when for every predict class. The error function is trying to promote the possibility for every predict</p>
+</li>
+</ul>
+<h1 id="gradient-descent">Gradient Descent<a hidden class="anchor" aria-hidden="true" href="#gradient-descent">#</a></h1>
+<ul>
+<li>Gradient Calculation
+<ul>
+<li>$\sigma^\prime = \sigma(x)(1-\sigma(x))$
+<ul>
+<li>$\sigma(x)$ is the sigmoid function.</li>
+</ul>
+</li>
+<li>calculate W, b seperately.
+<ul>
+<li>$\frac{\partial{E}}{\partial W_j}=(\hat y - y)x_j $</li>
+<li>$\frac{\partial E}{\partial b} = (\hat y -y)$</li>
+</ul>
+</li>
+<li>Calculate gradient of Error(E) for one element X
+<ul>
+<li>$X \in R^{m\times n}$</li>
+<li>$X^i \in R^{1\times n}$</li>
+<li>$\nabla E = (\hat y - y )(x_1, \dots , x_n, 1)$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Gradient Descent Step
+<ul>
+<li>Update W, and b.</li>
+<li>$w^\prime _i \leftarrow w_i -\alpha (\hat y - y)x_i$</li>
+<li>$b^\prime \leftarrow b - \alpha(\hat y - y )$</li>
+<li>$\Delta w_i = \alpha \times \delta \times x_i$
+<ul>
+<li>$\delta=\hat y -y$ is the error term</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="perceptron-vs-gradient-descent">Perceptron VS gradient descent<a hidden class="anchor" aria-hidden="true" href="#perceptron-vs-gradient-descent">#</a></h1>
+<ul>
+<li>In perceptron algorithm, the weights changed only when the classfication is wrong.</li>
+<li>In gradient descent, the weights will change in each iteration.</li>
+</ul>
+<h1 id="use-the-git-to-check-the-quier-notes">Use the Git to check the Quier notes.<a hidden class="anchor" aria-hidden="true" href="#use-the-git-to-check-the-quier-notes">#</a></h1>
+<p><a href="https://github.com/bradley-curran/quiver2jekylljs">Use tool quiver2jekyll</a></p>
+<h1 id="bug-emacs-font-tty-is-not-defined">Bug: Emacs Font tty is not defined.<a hidden class="anchor" aria-hidden="true" href="#bug-emacs-font-tty-is-not-defined">#</a></h1>
+<p><a href="https://github.com/purcell/emacs.d/issues/259">solution from github issue</a>
+delete the desktop file saved before.
+Solved!</p>
+<h1 id="use-mac-ctrl-h-as-delete-key-in-emacs">Use mac ctrl-h as delete key in emacs.<a hidden class="anchor" aria-hidden="true" href="#use-mac-ctrl-h-as-delete-key-in-emacs">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-lisp" data-lang="lisp"><span style="display:flex;"><span>(global-set-key (kbd <span style="color:#e6db74">&#34;C-?&#34;</span>) <span style="color:#e6db74">&#39;help-command</span>)
+</span></span><span style="display:flex;"><span>(global-set-key (kbd <span style="color:#e6db74">&#34;M-?&#34;</span>) <span style="color:#e6db74">&#39;mark-paragraph</span>)
+</span></span><span style="display:flex;"><span>(global-set-key (kbd <span style="color:#e6db74">&#34;C-h&#34;</span>) <span style="color:#e6db74">&#39;delete-backward-char</span>)
+</span></span><span style="display:flex;"><span>(global-set-key (kbd <span style="color:#e6db74">&#34;M-h&#34;</span>) <span style="color:#e6db74">&#39;backward-kill-word</span>)
+</span></span></code></pre></div><ol>
+<li>Add the above line into init-locals.el</li>
+</ol>
+<h1 id="what-is-npm">what is npm?<a hidden class="anchor" aria-hidden="true" href="#what-is-npm">#</a></h1>
+<p>Npm is a pakage manager for javascript.</p>
+<ol>
+<li>It can be used in terminal line.
+<ul>
+<li>npm publish reusable-code</li>
+</ul>
+</li>
+</ol>
+<h1 id="making-a-column-vector">Making a column vector<a hidden class="anchor" aria-hidden="true" href="#making-a-column-vector">#</a></h1>
+<ul>
+<li>Use arr[: ,None] to create a column vector.
+<ul>
+<li>! The arr.T can&rsquo;t trun a 1D row vector into 1D column vector.</li>
+</ul>
+</li>
+<li>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(features)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span> array([ <span style="color:#ae81ff">0.49671415</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.1382643</span> ,  <span style="color:#ae81ff">0.64768854</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(features<span style="color:#f92672">.</span>T)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span> array([ <span style="color:#ae81ff">0.49671415</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">0.1382643</span> ,  <span style="color:#ae81ff">0.64768854</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(features[:, <span style="color:#66d9ef">None</span>])
+</span></span><span style="display:flex;"><span><span style="color:#f92672">&gt;</span> array([[ <span style="color:#ae81ff">0.49671415</span>],
+</span></span><span style="display:flex;"><span>     [<span style="color:#f92672">-</span><span style="color:#ae81ff">0.1382643</span> ],
+</span></span><span style="display:flex;"><span>     [ <span style="color:#ae81ff">0.64768854</span>]])
+</span></span></code></pre></div></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="https://bovey0809.github.io/posts/2021-0704-pytestwithvscode/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Pytest &amp; VSCODE</span>
+  </a>
+  <a class="next" href="https://bovey0809.github.io/posts/2018-03-09-cleaning_data/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Cleaning Data</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://bovey0809.github.io/">Codemylife</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
